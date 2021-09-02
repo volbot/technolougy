@@ -1,0 +1,48 @@
+RHIZOMATIC MACHINERY RUNDOWN
+
+According to Deleuze and Guattari (A Thousand Plateaus), a rhizome:
+    1: CAN and MUST be strongly connected graphically (any part can be connected to any other part, generally with n3 connections)
+    2: is a connection between things of different "nature" (like orchid/wasp)
+    3: is multiplicitous, a unity that is multiple in itself. Addendum on Multiplicity has more information
+    4: may be broken, but will start up again on old or new lines
+    5 and 6: is not amenable to any structural model; it is a "map and not a tracing," in that it can be entered and exited at any point (practically) but cannot be traced, because a map is manipulatable and engineered for contact with the real, while a tracing implies a certain level of "competence" that requires it to always "return to the same." A tracing is an picture where a map is a diagram.
+
+The rhizome opposes the more widely known arborescent (hierarchical) model. Current tech mods use pretty much only hierarchical models:
+
+    [ Generator System(s) ] --> [ Battery System(s) ] --> [ Machine Network , Upgrades ]
+
+This setup does not violate rule 3, because each part can function on their own, but require one of each part to work. Each machine on its own is an individual unit, but can come together in multiplicities to create machine networks.
+This setup does not violate rule 4, because it can be turned into a map and is a functional network.
+This setup violates rules 1 and 2 because it is weakly connected and rule 4 because breakage on any of the bottlenecks (arrows in diagram) will render the entire system useless.
+    [ POINT OF INFORMATION: RULES 1 AND 2 ]
+    Why is an arborescent system weakly connected?
+
+    What would a strongly connected tech system look like?
+        Power should be distributed loosely in the system, and generators should be directly connected to each machine. The tier of generator determines the number of connections possible from it, n. A generator with tier 3 has 3 connections, and can thus be used to connect to 3 other machines, be they generators or functional machines. Each generator can be daisy chained to create a rhizome. This also solves the rule 4 violation, because on severing a connection, at least one generator is on each severed network.
+
+Thus, a rhizomatic tech system would be different from an arborescent tech system in that it is strongly connected, and in that each section can become an individual unit upon breakage.
+What would this look like?
+    1) Each block of a rhizomatic machine network should be able to function as a working system.
+    2) Upon severing a connection, each half can attempt to regenerate itself into a working system.
+        a) To this end, power should likely not be stored in batteries, and instead be stored loosely in the network.
+    3) Resources within a network should be able to reallocate themselves to needed locations.
+
+ADDENDUMS
+Addendum on Multiplicity
+    Multiplicity is difficult to describe specifically, because I'm stupid and haven't read any of these fucking books.
+    A multiplicity is a "union that is multiple in itself." It is not something that was once or should be whole, but it is also not a singular.
+    Examples: a wasp pollinating an orchid (Deleuze), a barrel of apples (Internet), a battery room (Me)
+
+SPECIFICS
+    Branches connect Points to create a Rhizome (TE)
+    Points can have Cardinal Chips inserted from 3 to 8 which determine the cardinality of the Point
+    Points can connect via Branches to other Points or a Machine
+    POWER GENERATION:
+        Power is constant output, but ranged (power must be generated in multiple places, or the Rhizome must be very efficiently designed)
+        Tiered fuel, pumped directly into Rhizome
+        Level 1 fuel is Sugar
+    MACHINES:
+        - Grinder
+        - Crusher
+        -
+
