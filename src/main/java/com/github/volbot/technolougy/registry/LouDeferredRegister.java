@@ -2,7 +2,7 @@ package com.github.volbot.technolougy.registry;
 
 import com.github.volbot.technolougy.Main;
 import com.github.volbot.technolougy.block.PointBlock;
-import com.github.volbot.technolougy.block.fluid.SugarWaterFluid;
+import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
 import net.minecraft.block.Block;
 import net.minecraft.block.FlowingFluidBlock;
@@ -66,7 +66,7 @@ public class LouDeferredRegister {
     private static ForgeFlowingFluid.Properties makeFluidProperties()
     {
         return new ForgeFlowingFluid.Properties(sugarWaterFluid, sugarWaterFluidFlowing,
-                FluidAttributes.builder(FLUID_STILL, FLUID_FLOWING).color(SugarWaterFluid.fluidColor))
+                FluidAttributes.builder(FLUID_STILL, FLUID_FLOWING).color(RhizomeFuelFluid.fluidColor))
                 .bucket(sugarWaterFluidBucket).block(sugarWaterFluidBlock);
     }
 }

@@ -26,4 +26,5 @@ public class Main {
     private void setup(final FMLCommonSetupEvent event) { }
 
     private void doClientStuff(final FMLClientSetupEvent event) { }
+
 }
