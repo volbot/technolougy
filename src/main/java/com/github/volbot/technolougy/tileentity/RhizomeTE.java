@@ -1,22 +1,38 @@
 package com.github.volbot.technolougy.tileentity;
 
+import com.github.volbot.technolougy.capabilities.LouCapabilityProvider;
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler, INBTSerializable<CompoundNBT> {
+public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler {
 
     private FluidStack waterTank;
     private int waterTankLimit;
+
+    protected FluidHandlerItemStack handler;
+    private final LazyOptional<IFluidHandler> fluidHandlerLazyOptional = LazyOptional.of(() -> handler);
+
+    @CapabilityInject(IFluidHandler.class)
+    public static Capability<IFluidHandler> FLUID_CAP = null;
 
     public RhizomeTE(TileEntityType<?> prop) {
         super(prop);
@@ -28,6 +44,23 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         super(LouDeferredRegister.rhizomeTE.get());
         waterTank = new FluidStack(Fluids.WATER,0);
         waterTankLimit = 100000;
+        this.FLUID_CAP = LouCapabilityProvider.FLUID_CAP;
+    }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        fluidHandlerLazyOptional.invalidate();
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        return cap == FLUID_CAP ? fluidHandlerLazyOptional.cast() : LazyOptional.empty();
+    }
+
+    public static Capability<IFluidHandler> get() {
+        return FLUID_CAP;
     }
 
     private int debugint = 0;
@@ -90,19 +123,5 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     @Override
     public FluidStack drain(int maxDrain, FluidAction action) {
         return null;
-    }
-
-    @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.put("fluidstack", getFluidInTank(0).writeToNBT(nbt));
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        if (nbt.contains("fluidstack", Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.fill(FluidStack.loadFluidStackFromNBT(nbt),FluidAction.EXECUTE);
-        }
     }
 }

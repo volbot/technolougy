@@ -2,76 +2,58 @@ package com.github.volbot.technolougy.capabilities;
 
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.*;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static com.github.volbot.technolougy.tileentity.RhizomeTE.FLUID_CAP;
+
 public class LouCapabilityProvider implements ICapabilitySerializable<CompoundNBT> {
 
     @CapabilityInject(IFluidHandler.class)
-    public static Capability<IFluidHandler> FLUID_CAP = null;
+    public static final Capability<IFluidHandler> FLUID_CAP = null;
 
-    public LouCapabilityProvider() {
-        this.registerCapabilities();
-    }
+    private LazyOptional<IFluidHandler> instance = LazyOptional.of(FLUID_CAP::getDefaultInstance);
 
-    public void registerCapabilities() {
-
-    }
-
-    public static Capability<IFluidHandler> get() {
-        return FLUID_CAP;
+    public LouCapabilityProvider(){
+        super();
+        //CapabilityManager.INSTANCE.register(IFluidHandler.class, new LouCapabilityStorage(),RhizomeTE::new);
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == FLUID_CAP) {
-            return LazyOptional.of(RhizomeTE::new).cast();
-        } else return LazyOptional.empty();
-
-    }
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) { return FLUID_CAP.orEmpty(cap, instance); }
 
     @Override
+    public void deserializeNBT(CompoundNBT nbt) { FLUID_CAP.getStorage().readNBT(FLUID_CAP, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null, nbt); }
+
+    @Override
+    public CompoundNBT serializeNBT() { return (CompoundNBT) FLUID_CAP.getStorage().writeNBT(FLUID_CAP, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null); }
+
+    /*
+    @Override
     public CompoundNBT serializeNBT() {
-        return null;
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.put("fluid_cap",
+                FLUID_CAP.getStorage()
+                        .writeNBT(
+                                FLUID_CAP,
+                                this.fluidHandlerLazyOptional
+                                        .orElseThrow(() -> new IllegalArgumentException("LazyOptional must not be empty!")),
+                                null)
+        );
+        return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-
+        FLUID_CAP.getStorage().readNBT(FLUID_CAP, this.fluidHandlerLazyOptional.orElseThrow(() -> new IllegalArgumentException("LazyOptional must not be empty!")), null, nbt);
     }
-
-    private static class CapabilityWorker<S extends CompoundNBT, C extends INBTSerializable<S>> implements Capability.IStorage<C> {
-
-        private final Capability<C> cap;
-
-        public CapabilityWorker(final Capability<C> capability) {
-            this.cap = capability;
-        }
-
-        @Nullable
-        @Override
-        public INBT writeNBT(Capability<C> capability, C instance, Direction side) {
-            if(this.cap != capability){
-                return null;
-            }
-            return instance.serializeNBT();
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void readNBT(Capability<C> capability, C instance, Direction side, INBT nbt) {
-            if(this.cap != capability) {
-                return;
-            }
-            instance.deserializeNBT((S) nbt);
-        }
-    }
+     */
 }
