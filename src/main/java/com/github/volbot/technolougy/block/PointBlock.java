@@ -19,11 +19,6 @@ public class PointBlock extends Block {
     }
 
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world){
-        return new RhizomeTE();
-    }
-
-    @Override
     public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         return ActionResultType.PASS;
     }
@@ -31,6 +26,11 @@ public class PointBlock extends Block {
     @Override
     public boolean hasTileEntity(BlockState state) {
         return true;
+    }
+
+    @Override
+    public TileEntity createTileEntity(BlockState state, IBlockReader world){
+        return new RhizomeTE();
     }
 
 }
