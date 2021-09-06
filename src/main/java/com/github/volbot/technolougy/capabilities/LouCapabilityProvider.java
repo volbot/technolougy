@@ -2,6 +2,7 @@ package com.github.volbot.technolougy.capabilities;
 
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.LazyOptional;
@@ -16,14 +17,20 @@ import static com.github.volbot.technolougy.tileentity.RhizomeTE.FLUID_CAP;
 
 public class LouCapabilityProvider implements ICapabilitySerializable<CompoundNBT> {
 
-    @CapabilityInject(IFluidHandler.class)
-    public static final Capability<IFluidHandler> FLUID_CAP = null;
-
     private LazyOptional<IFluidHandler> instance = LazyOptional.of(FLUID_CAP::getDefaultInstance);
+
+    @CapabilityInject(IFluidHandler.class)
+    public static Capability<IFluidHandler> FLUID_CAP = null;
 
     public LouCapabilityProvider(){
         super();
-        //CapabilityManager.INSTANCE.register(IFluidHandler.class, new LouCapabilityStorage(),RhizomeTE::new);
+        /*
+        CapabilityManager.INSTANCE.register(
+                IFluidHandler.class,
+                new LouCapabilityStorage(),
+                RhizomeTE::new
+        );
+         */
     }
 
     @Nonnull
@@ -31,10 +38,30 @@ public class LouCapabilityProvider implements ICapabilitySerializable<CompoundNB
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) { return FLUID_CAP.orEmpty(cap, instance); }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) { FLUID_CAP.getStorage().readNBT(FLUID_CAP, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null, nbt); }
+    public void deserializeNBT(CompoundNBT nbt) {
+        System.out.println("testo");
+        FLUID_CAP.getStorage().readNBT(
+                FLUID_CAP,
+                instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")),
+                null,
+                nbt
+        );
+    }
 
     @Override
-    public CompoundNBT serializeNBT() { return (CompoundNBT) FLUID_CAP.getStorage().writeNBT(FLUID_CAP, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null); }
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        System.out.println("testy");
+        INBT dat = FLUID_CAP.getStorage().writeNBT(
+                FLUID_CAP,
+                instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")),
+                null
+        );
+        if (dat!=null) {
+            nbt.put("fluidcap", dat);
+        }
+        return nbt;
+    }
 
     /*
     @Override

@@ -15,6 +15,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
@@ -31,9 +32,6 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     protected FluidHandlerItemStack handler;
     private final LazyOptional<IFluidHandler> fluidHandlerLazyOptional = LazyOptional.of(() -> handler);
 
-    @CapabilityInject(IFluidHandler.class)
-    public static Capability<IFluidHandler> FLUID_CAP = null;
-
     public RhizomeTE(TileEntityType<?> prop) {
         super(prop);
         waterTank = new FluidStack(Fluids.WATER,0);
@@ -44,7 +42,6 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         super(LouDeferredRegister.rhizomeTE.get());
         waterTank = new FluidStack(Fluids.WATER,0);
         waterTankLimit = 100000;
-        this.FLUID_CAP = LouCapabilityProvider.FLUID_CAP;
     }
 
     @Override
@@ -52,16 +49,20 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         super.invalidateCaps();
         fluidHandlerLazyOptional.invalidate();
     }
-
+/*
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         return cap == FLUID_CAP ? fluidHandlerLazyOptional.cast() : LazyOptional.empty();
     }
 
+ */
+/*
     public static Capability<IFluidHandler> get() {
         return FLUID_CAP;
     }
+
+ */
 
     private int debugint = 0;
 
@@ -97,6 +98,10 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         return false;
     }
 
+    protected void onContentsChanged() {
+        this.setChanged();
+    }
+
     @Override
     public int fill(FluidStack resource, FluidAction action) {
         int quantity = resource.getAmount();
@@ -104,9 +109,11 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         if(initialQuantity!=waterTankLimit) {
             if (initialQuantity + quantity > waterTankLimit) {
                 waterTank.setAmount(waterTankLimit);
+                onContentsChanged();
                 return waterTankLimit - initialQuantity;
             } else {
                 waterTank.setAmount(initialQuantity + quantity);
+                onContentsChanged();
                 return quantity;
             }
         }
