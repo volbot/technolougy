@@ -17,11 +17,12 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
+import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler, ICapabilitySerializable<CompoundNBT>, ICapabilityProvider {
+public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler, ICapabilitySerializable<CompoundNBT> {
 
     private FluidStack waterTank;
     private int waterTankLimit;
@@ -44,9 +45,8 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     public void tick() {
         if(debugint==12) {
             fill(new FluidStack(Fluids.WATER, 1), FluidAction.EXECUTE);
-            setChanged();
             CompoundNBT testnbt = new CompoundNBT();
-            System.out.println(FluidStack.loadFluidStackFromNBT(getFluidInTank(0).writeToNBT(testnbt)).getAmount());
+            System.out.println(getFluidInTank(0).getAmount());
             debugint=0;
         } else {
             debugint++;
@@ -55,12 +55,14 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
 
     @Override
     public CompoundNBT getUpdateTag() {
-        return super.getUpdateTag();
+        CompoundNBT updateTag = super.getUpdateTag();
+        return getFluidInTank(0).writeToNBT(updateTag);
     }
 
     @Override
     public void handleUpdateTag(BlockState state, CompoundNBT tag) {
         super.handleUpdateTag(state, tag);
+        //deserializeNBT(tag);
     }
 
     @Override
@@ -68,6 +70,7 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         super.save(nbt);
         System.out.println("testi");
         //nbt.put("fluid_cap", getFluidInTank(0).writeToNBT(nbt));
+        System.out.println("WROTE "+getFluidInTank(0).getAmount()+" BUCKETS");
         return getFluidInTank(0).writeToNBT(nbt);
     }
 
@@ -88,10 +91,9 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
                 nbt
         );
          */
-        FluidStack fluidStack = new FluidStack(Fluids.WATER,nbt.getInt("Amount"));
-        System.out.println(fluidStack.getAmount()+" B READ");
+        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(nbt);
+        System.out.println("FluidStack Amount: "+fluidStack.getAmount());
         this.fill(fluidStack,FluidAction.EXECUTE);
-        setChanged();
     }
 
 
@@ -156,9 +158,11 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         if(initialQuantity!=waterTankLimit) {
             if (initialQuantity + quantity > waterTankLimit) {
                 waterTank.setAmount(waterTankLimit);
+                setChanged();
                 return waterTankLimit - initialQuantity;
             } else {
                 waterTank.setAmount(initialQuantity + quantity);
+                setChanged();
                 return quantity;
             }
         }
