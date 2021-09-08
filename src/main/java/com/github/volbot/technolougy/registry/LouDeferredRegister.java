@@ -66,7 +66,7 @@ public class LouDeferredRegister {
     private static ForgeFlowingFluid.Properties makeFluidProperties()
     {
         return new ForgeFlowingFluid.Properties(sugarWaterFluid, sugarWaterFluidFlowing,
-                FluidAttributes.builder(FLUID_STILL, FLUID_FLOWING).color(RhizomeFuelFluid.fluidColor))
+                FluidAttributes.builder(FLUID_STILL, FLUID_FLOWING).color(0xFF4B92DB))
                 .bucket(sugarWaterFluidBucket).block(sugarWaterFluidBlock);
     }
 }
