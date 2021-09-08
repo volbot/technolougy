@@ -27,10 +27,10 @@ public class LouDeferredRegister {
     public static final ResourceLocation FLUID_FLOWING = new ResourceLocation("minecraft:block/water_flow");
 
     public static RegistryObject<ForgeFlowingFluid> sugarWaterFluid = FLUIDS.register("sugar_water", () ->
-            new ForgeFlowingFluid.Source(makeFluidProperties())
+            new RhizomeFuelFluid.Source(makeFluidProperties())
     );
     public static RegistryObject<ForgeFlowingFluid> sugarWaterFluidFlowing = FLUIDS.register("sugar_water_flowing", () ->
-            new ForgeFlowingFluid.Flowing(makeFluidProperties())
+            new RhizomeFuelFluid.Flowing(makeFluidProperties())
     );
 
     //register blocks

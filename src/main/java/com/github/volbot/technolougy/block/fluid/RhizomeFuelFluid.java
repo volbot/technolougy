@@ -1,5 +1,6 @@
 package com.github.volbot.technolougy.block.fluid;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.fluid.FluidState;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 
@@ -17,8 +18,8 @@ public class RhizomeFuelFluid extends ForgeFlowingFluid {
     }
 
     @Override
-    public int getAmount(FluidState fluidState) {
-        return 0;
+    public int getAmount(FluidState state) {
+        return state.getValue(LEVEL);
     }
 
 }

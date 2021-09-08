@@ -4,28 +4,23 @@ import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
-import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler, ICapabilitySerializable<CompoundNBT> {
+public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler, ICapabilityProvider {
 
-    private FluidStack waterTank;
-    private int waterTankLimit;
+    private FluidStack fuelTank;
+    private int fuelTankLimit;
 
     @CapabilityInject(IFluidHandler.class)
     public static Capability<IFluidHandler> FLUID_CAP = null;
@@ -34,18 +29,15 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
 
     public RhizomeTE() {
         super(LouDeferredRegister.rhizomeTE.get());
-        waterTank = new FluidStack(Fluids.WATER,0);
-        waterTankLimit = 100000;
-        System.out.println("RHIZOME APPLIED TO BLOCK");
+        fuelTank = new FluidStack(Fluids.WATER,0);
+        fuelTankLimit = 100000;
     }
 
     private int debugint = 0;
 
     @Override
     public void tick() {
-        if(debugint==12) {
-            fill(new FluidStack(Fluids.WATER, 1), FluidAction.EXECUTE);
-            CompoundNBT testnbt = new CompoundNBT();
+        if(debugint==10) {
             System.out.println(getFluidInTank(0).getAmount());
             debugint=0;
         } else {
@@ -62,106 +54,83 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     @Override
     public void handleUpdateTag(BlockState state, CompoundNBT tag) {
         super.handleUpdateTag(state, tag);
-        //deserializeNBT(tag);
     }
 
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
         super.save(nbt);
-        System.out.println("testi");
-        //nbt.put("fluid_cap", getFluidInTank(0).writeToNBT(nbt));
-        System.out.println("WROTE "+getFluidInTank(0).getAmount()+" BUCKETS");
         return getFluidInTank(0).writeToNBT(nbt);
     }
 
     @Override
     public void load(BlockState state, CompoundNBT nbt) {
         super.load(state, nbt);
-        System.out.println("testo");
         deserializeNBT(nbt);
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        /*
-        FLUID_CAP.getStorage().readNBT(
-                FLUID_CAP,
-                instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")),
-                null,
-                nbt
-        );
-         */
         FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(nbt);
-        System.out.println("FluidStack Amount: "+fluidStack.getAmount());
         this.fill(fluidStack,FluidAction.EXECUTE);
     }
-
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        /*
-        INBT dat = FLUID_CAP.getStorage().writeNBT(
-                FLUID_CAP,
-                instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")),
-                null
-        );
-
-         */;
         return getFluidInTank(0).writeToNBT(nbt);
     }
-
-    protected FluidHandlerItemStack handler;
-    private LazyOptional<IFluidHandler> fluidHandlerLazyOptional = LazyOptional.of(() -> handler);
 
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
-        fluidHandlerLazyOptional.invalidate();
+        instance.invalidate();
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        return cap == FLUID_CAP ? fluidHandlerLazyOptional.cast() : LazyOptional.empty();
+        return cap == FLUID_CAP ? instance.cast() : LazyOptional.empty();
     }
 
     @Override
     public int getTanks() {
-        return 0;
+        return 1;
     }
 
     @Nonnull
     @Override
     public FluidStack getFluidInTank(int tank) {
-        return waterTank;
+        if(tank == 0){
+            return fuelTank;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public int getTankCapacity(int tank) {
-        return 0;
+        return fuelTankLimit;
     }
 
     @Override
     public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
-        return true;
-    }
-
-    protected void onContentsChanged() {
-        this.setChanged();
+        if(tank == 0){
+            return true;
+        }
+        return false;
     }
 
     @Override
     public int fill(FluidStack resource, FluidAction action) {
         int quantity = resource.getAmount();
-        int initialQuantity = waterTank.getAmount();
-        if(initialQuantity!=waterTankLimit) {
-            if (initialQuantity + quantity > waterTankLimit) {
-                waterTank.setAmount(waterTankLimit);
+        int initialQuantity = fuelTank.getAmount();
+        if(initialQuantity!= fuelTankLimit) {
+            if (initialQuantity + quantity > fuelTankLimit) {
+                fuelTank.setAmount(fuelTankLimit);
                 setChanged();
-                return waterTankLimit - initialQuantity;
+                return fuelTankLimit - initialQuantity;
             } else {
-                waterTank.setAmount(initialQuantity + quantity);
+                fuelTank.setAmount(initialQuantity + quantity);
                 setChanged();
                 return quantity;
             }
@@ -172,12 +141,36 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     @Nonnull
     @Override
     public FluidStack drain(FluidStack resource, FluidAction action) {
-        return null;
+        int quantity = resource.getAmount();
+        int initialQuantity = fuelTank.getAmount();
+        FluidStack drained = new FluidStack(fuelTank.getFluid(), 0);
+        if(!(!fuelTank.getFluid().isSame(resource.getFluid())||fuelTank.isEmpty())) {
+            if (initialQuantity <= quantity) {
+                fuelTank.setAmount(0);
+                drained.setAmount(initialQuantity);
+            } else {
+                fuelTank.setAmount(initialQuantity - quantity);
+                drained.setAmount(initialQuantity);
+            }
+        }
+        return drained;
     }
 
     @Nonnull
     @Override
     public FluidStack drain(int maxDrain, FluidAction action) {
-        return null;
+        int quantity = maxDrain;
+        int initialQuantity = fuelTank.getAmount();
+        FluidStack drained = new FluidStack(fuelTank.getFluid(), 0);
+        if(!fuelTank.isEmpty()) {
+            if (initialQuantity <= quantity) {
+                fuelTank.setAmount(0);
+                drained.setAmount(initialQuantity);
+            } else {
+                fuelTank.setAmount(initialQuantity - quantity);
+                drained.setAmount(initialQuantity);
+            }
+        }
+        return drained;
     }
 }
