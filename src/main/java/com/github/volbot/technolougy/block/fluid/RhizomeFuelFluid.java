@@ -1,5 +1,6 @@
 package com.github.volbot.technolougy.block.fluid;
 
+import net.minecraft.block.CauldronBlock;
 import net.minecraft.fluid.FluidState;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 

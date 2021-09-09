@@ -18,6 +18,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
+import javax.annotation.Nullable;
+
 public class PointBlock extends Block {
 
     public PointBlock(Properties prop) {
@@ -47,6 +49,16 @@ public class PointBlock extends Block {
             return ActionResultType.sidedSuccess(world.isClientSide);
         }
         return ActionResultType.PASS;
+    }
+
+    @Override
+    public void playerDestroy(World world, PlayerEntity playerEntity, BlockPos pos, BlockState state, @Nullable TileEntity tileEntity, ItemStack itemStack) {
+        super.playerDestroy(world, playerEntity, pos, state, tileEntity, itemStack);
+        RhizomeTE rhizome = (RhizomeTE) world.getBlockEntity(pos);
+        BlockPos neighbor = RhizomeUtils.findRhizomeNeighbors(world, pos);
+        if(rhizome!=null && neighbor!=null) {
+            rhizome.setPosition(neighbor);
+        }
     }
 
     @Override
