@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.state.Property;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -26,11 +27,13 @@ public class PointBlock extends Block {
         super(prop);
     }
 
+    private BlockPos rhizomeHolder;
+
     @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult raytrace) {
         if(!player.isShiftKeyDown()) {
             ItemStack heldItem = player.getItemBySlot(EquipmentSlotType.MAINHAND);
-            RhizomeTE rhizome = (RhizomeTE) world.getBlockEntity(pos);
+            RhizomeTE rhizome = (RhizomeTE) world.getBlockEntity(rhizomeHolder);
             if (heldItem.sameItem(LouDeferredRegister.sugarWaterFluidBucket.get().getDefaultInstance())) {
                 if (rhizome != null) {
                     if(rhizome.fill(new FluidStack(LouDeferredRegister.sugarWaterFluid.get().getFluid(), 1000), IFluidHandler.FluidAction.EXECUTE)>0
@@ -51,13 +54,24 @@ public class PointBlock extends Block {
         return ActionResultType.PASS;
     }
 
+    public void setRhizomeHolder(BlockPos rhizomePos) {
+        this.rhizomeHolder = rhizomePos;
+    }
+
+    public BlockPos getRhizomeHolder() {
+        return this.rhizomeHolder;
+    }
+
     @Override
     public void playerDestroy(World world, PlayerEntity playerEntity, BlockPos pos, BlockState state, @Nullable TileEntity tileEntity, ItemStack itemStack) {
         super.playerDestroy(world, playerEntity, pos, state, tileEntity, itemStack);
-        RhizomeTE rhizome = (RhizomeTE) world.getBlockEntity(pos);
-        BlockPos neighbor = RhizomeUtils.findRhizomeNeighbors(world, pos);
-        if(rhizome!=null && neighbor!=null) {
-            rhizome.setPosition(neighbor);
+        if(pos.equals(rhizomeHolder)){
+            RhizomeTE rhizome = (RhizomeTE) world.getBlockEntity(rhizomeHolder);
+            BlockPos neighbor = RhizomeUtils.findRhizomeNeighbors(world, pos, true);
+            if(rhizome!=null && neighbor!=null) {
+                rhizome.setPosition(neighbor);
+                RhizomeUtils.updateRhizomeHolders(world,pos,neighbor);
+            }
         }
     }
 
@@ -68,7 +82,19 @@ public class PointBlock extends Block {
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world){
-        return new RhizomeTE();
+        return null;
     }
 
+    @Override
+    public void onPlace(BlockState blockState, World world, BlockPos blockPos, BlockState state, boolean bool) {
+        super.onPlace(blockState, world, blockPos, state, bool);
+        if(rhizomeHolder==null) {
+            BlockPos neighbor = RhizomeUtils.findRhizomeNeighbors(world, blockPos, true);
+            if (neighbor == null) {
+                this.setRhizomeHolder(blockPos);
+            } else {
+                this.setRhizomeHolder(neighbor);
+            }
+        }
+    }
 }

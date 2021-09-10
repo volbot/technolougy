@@ -1,5 +1,7 @@
 package com.github.volbot.technolougy.tileentity;
 
+import com.github.volbot.technolougy.block.PointBlock;
+import com.github.volbot.technolougy.block.RhizomeUtils;
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluids;
@@ -7,6 +9,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -39,6 +43,9 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     public void tick() {
         if(debugint==10) {
             System.out.println(getFluidInTank(0).getAmount());
+            if(!((PointBlock) getBlockState().getBlock()).getRhizomeHolder().equals(getBlockPos())){
+                getLevel().removeBlockEntity(getBlockPos());
+            }
             debugint=0;
         } else {
             debugint++;
