@@ -3,6 +3,7 @@ package com.github.volbot.technolougy.registry;
 import com.github.volbot.technolougy.Main;
 import com.github.volbot.technolougy.block.PointBlock;
 import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
+import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
 import net.minecraft.block.Block;
 import net.minecraft.block.FlowingFluidBlock;
@@ -53,12 +54,18 @@ public class LouDeferredRegister {
     );
 
     //register tile entities
+
     public static final net.minecraftforge.registries.DeferredRegister<TileEntityType<?>> TILE_ENTITIES = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
+
+    public static final RegistryObject<TileEntityType<RhizomeProxyTE>> rhizomeProxyTE = TILE_ENTITIES.register("rhizome_proxy_te",
+            () -> TileEntityType.Builder.of(RhizomeProxyTE::new, pointGen.get())
+                    .build(null)
+    );
+
     public static final RegistryObject<TileEntityType<RhizomeTE>> rhizomeTE = TILE_ENTITIES.register("rhizome_te",
             () -> TileEntityType.Builder.of(RhizomeTE::new, pointGen.get())
                     .build(null)
     );
-
 
     /*
         Method to initialize the game data of the Solution fluid.

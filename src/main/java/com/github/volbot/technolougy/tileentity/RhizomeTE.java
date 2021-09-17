@@ -35,6 +35,11 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
         super(LouDeferredRegister.rhizomeTE.get());
         fuelTank = new FluidStack(Fluids.WATER,0);
         fuelTankLimit = 100000;
+        /*
+        if(getBlockState().getValue(PointBlock.getPropertyProxy())==true){
+            this.setRemoved();
+        }
+         */
     }
 
     private int debugint = 0;
@@ -43,9 +48,6 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     public void tick() {
         if(debugint==10) {
             System.out.println(getFluidInTank(0).getAmount());
-            if(!((PointBlock) getBlockState().getBlock()).getRhizomeHolder().equals(getBlockPos())){
-                getLevel().removeBlockEntity(getBlockPos());
-            }
             debugint=0;
         } else {
             debugint++;
