@@ -24,7 +24,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.util.ArrayList;
 
 public class PointBlock extends Block {
 
@@ -32,34 +32,15 @@ public class PointBlock extends Block {
 
     public PointBlock(Properties prop) {
         super(prop);
-        this.registerDefaultState(this.getStateDefinition().any()
-            .setValue(proxy, true)
-        );
     }
-
-    static final Property<Boolean> proxy = BooleanProperty.create("proxy");
 
     @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult raytrace) {
         if(!player.isShiftKeyDown()) {
             ItemStack heldItem = player.getItemBySlot(EquipmentSlotType.MAINHAND);
-            RhizomeTE rhizome = null;
-            TileEntity TE = world.getBlockEntity(pos.immutable());
-            if(TE instanceof RhizomeTE) {
-                rhizome = (RhizomeTE) world.getBlockEntity(pos);
-            } else if(TE instanceof RhizomeProxyTE) {
-                System.out.println(pos.immutable());
-                RhizomeProxyTE proxyTE = (RhizomeProxyTE)world.getBlockEntity(pos.immutable());
-                proxyTE.isProxy("pickle");
-                //System.out.println(TE==null);
-                //RhizomeProxyTE proxyTE = (RhizomeProxyTE) TE;
-                System.out.println(proxyTE==null);
-                BlockPos holder = proxyTE.getRhizomeHolder();
-                System.out.println(holder==null);
-                System.out.println(holder);
-                rhizome = (RhizomeTE) world.getBlockEntity(holder);
-            } else {
-                System.out.println("TILE ENTITY NULL AT "+pos.immutable());
+            RhizomeTE rhizome = (RhizomeTE)world.getBlockEntity(pos.immutable());
+            if (rhizome == null) {
+                System.out.println("RHIZOME NULL AT "+pos);
                 return ActionResultType.FAIL;
             }
             if (heldItem.sameItem(LouDeferredRegister.sugarWaterFluidBucket.get().getDefaultInstance())) {
@@ -82,27 +63,9 @@ public class PointBlock extends Block {
         return ActionResultType.PASS;
     }
 
-    /*
     @Override
     public void playerDestroy(World world, PlayerEntity playerEntity, BlockPos pos, BlockState state, @Nullable TileEntity tileEntity, ItemStack itemStack) {
         super.playerDestroy(world, playerEntity, pos, state, tileEntity, itemStack);
-        if(pos.equals(rhizomeHolder)){
-            RhizomeTE rhizome = (RhizomeTE) world.getBlockEntity(rhizomeHolder);
-            BlockPos neighbor = RhizomeUtils.findRhizomeNeighbors(world, pos, true);
-            if(rhizome!=null && neighbor!=null) {
-                rhizome.setPosition(neighbor);
-                RhizomeUtils.updateRhizomeHolders(world,pos,neighbor);
-            }
-        }
-    }
-
-     */
-
-    public static Property<Boolean> getPropertyProxy() {
-        return proxy;
-    }
-
-    public static void setPropertyProxy(World world){
     }
 
     @Override
@@ -111,46 +74,17 @@ public class PointBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(proxy);
+    public void onPlace(BlockState state, World world, BlockPos pos, BlockState state1, boolean b) {
+        super.onPlace(state, world, pos, state1, b);
+    }
+
+    @Override
+    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
+
     }
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world){
-        if(state.getValue(proxy).booleanValue()){
-            if(neighborTemp!=null) {
-                System.out.println("RHIZOME PROXY CREATED");
-                RhizomeProxyTE proxyTE;
-                BlockPos neighbor = neighborTemp;
-                neighborTemp = null;
-                return new RhizomeProxyTE(neighbor);
-            } else {
-                return new RhizomeProxyTE(null);
-            }
-        } else {
-            System.out.println("RHIZOME CREATED");
-            return new RhizomeTE();
-        }
+        return new RhizomeTE();
     }
-
-    /*
-    @Override
-    public void onPlace(BlockState blockState, World world, BlockPos blockPos, BlockState state, boolean bool) {
-        super.onPlace(blockState, world, blockPos, state, bool);
-        if(blockState.getValue(proxy)) {
-            BlockPos neighbor = RhizomeUtils.findRhizomeNeighbors(world, blockPos, true);
-            if (neighbor == null) {
-                System.out.println("BPLACED");
-                world.setBlockAndUpdate(
-                        blockPos,
-                        blockState.getBlock().defaultBlockState().setValue(proxy,false)
-                );
-            } else {
-                neighborTemp=neighbor;
-            }
-        }
-    }
-
-     */
 }

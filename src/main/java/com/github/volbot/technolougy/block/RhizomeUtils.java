@@ -2,38 +2,16 @@ package com.github.volbot.technolougy.block;
 
 import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
-import jdk.nashorn.internal.ir.Block;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBiomeReader;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 
 public class RhizomeUtils {
-    public static BlockPos findRhizomeNeighbors(IBlockReader world, BlockPos startPoint) {
-        BlockPos[] neighbors = new BlockPos[]{
-                startPoint.above(),
-                startPoint.below(),
-                startPoint.north(),
-                startPoint.south(),
-                startPoint.east(),
-                startPoint.west()
-        };
-        for(BlockPos pos : neighbors){
-            if(
-                    pos!=null &&
-                    world.getBlockEntity(pos)!=null &&
-                    world.getBlockEntity(pos) instanceof RhizomeTE)
-            {
-                return pos;
-            }
-        }
-        return null;
-    }
 
-    public static BlockPos askProxyNeighbors(IBlockReader world, BlockPos startPoint) {
+    public static BlockPos[] searchConnections(IBlockReader world, BlockPos startPoint) {
         BlockPos[] neighbors = new BlockPos[]{
                 startPoint.above(),
                 startPoint.below(),
@@ -42,15 +20,92 @@ public class RhizomeUtils {
                 startPoint.east(),
                 startPoint.west()
         };
-        for(BlockPos pos : neighbors){
-            if(world.getBlockEntity(pos)!=null){
-                TileEntity TE = world.getBlockEntity(pos);
-                if(TE instanceof RhizomeProxyTE){
-                    return ((RhizomeProxyTE) TE).getRhizomeHolder();
+        ArrayList<BlockPos> rhizomes = new ArrayList<>();
+        for(BlockPos neighbor : neighbors){
+            Block block = world.getBlockState(neighbor).getBlock();
+            if(block instanceof PointBlock && !rhizomes.contains(neighbor)) {
+                System.out.println("RHIZOME FOUND");
+                rhizomes.add(neighbor);
+            } else if(block instanceof ConnectionBlock) {
+                System.out.println("CONNECTION FOUND");
+                RhizomeProxyTE proxy = (RhizomeProxyTE) world.getBlockEntity(neighbor);
+                BlockPos[] connections = proxy.getRhizomeHolders();
+                for(BlockPos connection : connections) {
+                    if(connection != null && !rhizomes.contains(connection)){
+                        rhizomes.add(connection);
+                    }
                 }
             }
         }
-        return null;
+        BlockPos[] connections = new BlockPos[rhizomes.size()];
+        for(int i = 0; i < rhizomes.size(); i++) {
+            System.out.println(i+": "+rhizomes.get(i));
+            connections[i]=rhizomes.get(i);
+        }
+        return connections;
+    }
+
+    public static BlockPos[] searchConnections(IBlockReader world, BlockPos startPoint, BlockPos ignore) {
+        BlockPos[] neighbors = new BlockPos[]{
+                startPoint.above(),
+                startPoint.below(),
+                startPoint.north(),
+                startPoint.south(),
+                startPoint.east(),
+                startPoint.west()
+        };
+        ArrayList<BlockPos> rhizomes = new ArrayList<>();
+        for(BlockPos neighbor : neighbors){
+            if(!ignore.equals(neighbor)) {
+                Block block = world.getBlockState(neighbor).getBlock();
+                if (block instanceof PointBlock && !rhizomes.contains(neighbor)) {
+                    System.out.println("RHIZOME FOUND");
+                    rhizomes.add(neighbor);
+                } else if (block instanceof ConnectionBlock) {
+                    System.out.println("CONNECTION FOUND");
+                    RhizomeProxyTE proxy = (RhizomeProxyTE) world.getBlockEntity(neighbor);
+                    BlockPos[] connections = proxy.getRhizomeHolders();
+                    for (BlockPos connection : connections) {
+                        if (connection != null && !rhizomes.contains(connection)) {
+                            rhizomes.add(connection);
+                        }
+                    }
+                }
+            }
+        }
+        BlockPos[] connections = new BlockPos[rhizomes.size()];
+        for(int i = 0; i < rhizomes.size(); i++) {
+            System.out.println(i+": "+rhizomes.get(i));
+            connections[i]=rhizomes.get(i);
+        }
+        return connections;
+    }
+
+    public static int countProxies(IBlockReader world, BlockPos startPoint) {
+        return countProxies(world,startPoint,new ArrayList<>());
+    }
+
+    public static int countProxies(IBlockReader world, BlockPos startPoint, ArrayList<BlockPos> visited) {
+        BlockPos[] neighbors = new BlockPos[]{
+                startPoint.above(),
+                startPoint.below(),
+                startPoint.north(),
+                startPoint.south(),
+                startPoint.east(),
+                startPoint.west()
+        };
+        int count = 0;
+        for(BlockPos neighbor : neighbors) {
+            if(visited.contains(neighbor)) {
+                continue;
+            }
+            System.out.println("new");
+            visited.add(neighbor);
+            if(world.getBlockState(neighbor).getBlock() instanceof ConnectionBlock) {
+                count+=1+countProxies(world,neighbor,visited);
+            }
+        }
+        return count;
     }
 
     public static BlockPos findRhizomeNeighbors(IBlockReader world, BlockPos startPoint, boolean recursive) {
@@ -67,21 +122,57 @@ public class RhizomeUtils {
                 startPoint.west()
         };
         for(BlockPos neighbor : neighbors){
-            System.out.println("VISITING "+neighbor);
             if(!visited.contains(neighbor)) {
-                System.out.println("NEIGHBOR IS NEW");
                 visited.add(neighbor);
                 if(world.getBlockEntity(neighbor) != null) {
-                    System.out.println("NEIGHBOR HAS ENTITY");
                     if (world.getBlockEntity(neighbor) instanceof RhizomeTE) {
-                        System.out.println("NEIGHBOR IS RHIZOME");
                         return neighbor;
                     } else if (world.getBlockEntity(neighbor) instanceof RhizomeProxyTE) {
-                        System.out.println("NEIGHBOR KNOWS OF RHIZOME, FOLLOWING:");
                         return findRhizomeNeighbors(world, neighbor, visited);
                     }
                 }
                 continue;
+            }
+        }
+        return null;
+    }
+
+    public static BlockPos findRhizomeNeighbors(IBlockReader world, BlockPos startPoint) {
+        BlockPos[] neighbors = new BlockPos[]{
+                startPoint.above(),
+                startPoint.below(),
+                startPoint.north(),
+                startPoint.south(),
+                startPoint.east(),
+                startPoint.west()
+        };
+        for(BlockPos pos : neighbors){
+            if(
+                    pos!=null &&
+                            world.getBlockEntity(pos)!=null &&
+                            world.getBlockEntity(pos) instanceof RhizomeTE)
+            {
+                return pos;
+            }
+        }
+        return null;
+    }
+
+    public static BlockPos[] askProxyNeighbors(IBlockReader world, BlockPos startPoint) {
+        BlockPos[] neighbors = new BlockPos[]{
+                startPoint.above(),
+                startPoint.below(),
+                startPoint.north(),
+                startPoint.south(),
+                startPoint.east(),
+                startPoint.west()
+        };
+        for(BlockPos pos : neighbors){
+            if(world.getBlockEntity(pos)!=null){
+                TileEntity TE = world.getBlockEntity(pos);
+                if(TE instanceof RhizomeProxyTE){
+                    return ((RhizomeProxyTE) TE).getRhizomeHolders();
+                }
             }
         }
         return null;

@@ -1,6 +1,7 @@
 package com.github.volbot.technolougy.registry;
 
 import com.github.volbot.technolougy.Main;
+import com.github.volbot.technolougy.block.ConnectionBlock;
 import com.github.volbot.technolougy.block.PointBlock;
 import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
 import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
@@ -37,6 +38,8 @@ public class LouDeferredRegister {
     //register blocks
     public static final net.minecraftforge.registries.DeferredRegister<Block> BLOCKS = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MODID);
     public static final RegistryObject<Block> pointGen = BLOCKS.register("point_gen", () -> new PointBlock(Block.Properties.of(Material.HEAVY_METAL)));
+    public static final RegistryObject<Block> connectionBlock = BLOCKS.register("connection_block", () -> new ConnectionBlock(Block.Properties.of(Material.HEAVY_METAL)));
+
 
     public static RegistryObject<FlowingFluidBlock> sugarWaterFluidBlock = BLOCKS.register("sugar_water_fluid_block", () ->
             new FlowingFluidBlock(sugarWaterFluid, Block.Properties.of(Material.WATER).noDrops())
@@ -49,6 +52,11 @@ public class LouDeferredRegister {
                     new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS))
     );
 
+    public static final RegistryObject<Item> connectionBlockItem = ITEMS.register("connection_block",
+            () -> new BlockItem( connectionBlock.get(),
+                    new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS))
+    );
+
     public static RegistryObject<Item> sugarWaterFluidBucket = ITEMS.register("sugar_water_bucket", () ->
             new BucketItem(sugarWaterFluid, new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_BUILDING_BLOCKS).craftRemainder(Items.BUCKET))
     );
@@ -58,7 +66,7 @@ public class LouDeferredRegister {
     public static final net.minecraftforge.registries.DeferredRegister<TileEntityType<?>> TILE_ENTITIES = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
 
     public static final RegistryObject<TileEntityType<RhizomeProxyTE>> rhizomeProxyTE = TILE_ENTITIES.register("rhizome_proxy_te",
-            () -> TileEntityType.Builder.of(RhizomeProxyTE::new, pointGen.get())
+            () -> TileEntityType.Builder.of(RhizomeProxyTE::new, connectionBlock.get())
                     .build(null)
     );
 

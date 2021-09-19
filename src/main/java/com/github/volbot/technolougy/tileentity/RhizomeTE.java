@@ -9,8 +9,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -34,12 +33,7 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     public RhizomeTE() {
         super(LouDeferredRegister.rhizomeTE.get());
         fuelTank = new FluidStack(Fluids.WATER,0);
-        fuelTankLimit = 100000;
-        /*
-        if(getBlockState().getValue(PointBlock.getPropertyProxy())==true){
-            this.setRemoved();
-        }
-         */
+        fuelTankLimit = 10000;
     }
 
     private int debugint = 0;
@@ -104,6 +98,10 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     @Override
     public int getTanks() {
         return 1;
+    }
+
+    public void signalMerge() {
+        this.setRemoved();
     }
 
     @Nonnull
