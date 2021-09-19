@@ -1,6 +1,5 @@
 package com.github.volbot.technolougy.block;
 
-import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

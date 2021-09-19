@@ -1,7 +1,5 @@
 package com.github.volbot.technolougy.tileentity;
 
-import com.github.volbot.technolougy.block.PointBlock;
-import com.github.volbot.technolougy.block.RhizomeUtils;
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluids;
@@ -9,7 +7,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.world.IBlockReader;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
