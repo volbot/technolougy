@@ -76,6 +76,19 @@ public class PointBlock extends Block {
     @Override
     public void onPlace(BlockState state, World world, BlockPos pos, BlockState state1, boolean b) {
         super.onPlace(state, world, pos, state1, b);
+        BlockPos[] neighbors = new BlockPos[]{
+                pos.above(),
+                pos.below(),
+                pos.north(),
+                pos.south(),
+                pos.east(),
+                pos.west()
+        };
+        for(BlockPos neighbor : neighbors) {
+            if(world.getBlockState(neighbor).getBlock() instanceof ConnectionBlock){
+                ((RhizomeProxyTE)world.getBlockEntity(neighbor)).searchConnections();
+            }
+        }
     }
 
     @Override

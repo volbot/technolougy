@@ -29,7 +29,7 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void tick() {
-        if(getLevel().isClientSide()) {
+        if(!getLevel().isClientSide()) {
             if (debugint != 10) {
                 debugint++;
             } else {
@@ -46,6 +46,10 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
         if(n2!=null) {
             this.n2 = n2;
         }
+    }
+
+    public void setRhizomeHolders(BlockPos[] holders) {
+        this.setRhizomeHolders(holders[0],holders[1]);
     }
 
     public BlockPos[] getRhizomeHolders() {
@@ -72,26 +76,6 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
         }
     }
 
-    private void searchConnections(BlockPos messenger) {
-        BlockPos[] connections = RhizomeUtils.searchConnections(getLevel(),getBlockPos());
-        BlockPos[] initialHolders = getRhizomeHolders();
-        RhizomeProxyTE proxy = (RhizomeProxyTE) getLevel().getBlockEntity(getBlockPos());
-        System.out.println(proxy==null);
-        if(connections.length==0) {
-
-        } else if (connections.length==1){
-            proxy.setRhizomeHolders(connections[0],null);
-        } else if (connections.length==2){
-            proxy.setRhizomeHolders(connections[0],connections[1]);
-        } else {
-            System.out.println("TOO MANY CONNECTIONS");
-        }
-        BlockPos[] afterHolders = getRhizomeHolders();
-        if(!initialHolders.equals(afterHolders)){
-            notifyNeighbors(messenger);
-        }
-    }
-
     public void notifyNeighbors(BlockPos messenger) {
         BlockPos[] neighbors = new BlockPos[]{
                 getBlockPos().above(),
@@ -109,7 +93,9 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
                 continue;
             }
             if(getLevel().getBlockState(neighbor).getBlock() instanceof ConnectionBlock){
-                ((RhizomeProxyTE)getLevel().getBlockEntity(neighbor)).searchConnections(getBlockPos());
+                System.out.println("NOTIFYING "+neighbor);
+                ((RhizomeProxyTE)getLevel().getBlockEntity(neighbor)).setRhizomeHolders(this.getRhizomeHolders());
+                ((RhizomeProxyTE)getLevel().getBlockEntity(neighbor)).notifyNeighbors(getBlockPos());
             }
         }
 

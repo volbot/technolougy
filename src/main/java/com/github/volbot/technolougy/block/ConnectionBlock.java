@@ -38,7 +38,6 @@ public class ConnectionBlock extends Block {
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos pos2, boolean b) {
         super.neighborChanged(state, world, pos, block, pos2, b);
         System.out.println("UPDATE AT "+pos);
-        ((RhizomeProxyTE)world.getBlockEntity(pos)).searchConnections();
         world.sendBlockUpdated(pos, state, state, 2);
     }
 
