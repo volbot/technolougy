@@ -30,11 +30,6 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
                 debugint++;
             } else {
                 debugint = 0;
-                if(getLevel().isClientSide()) {
-                    System.out.println("CLIENT: R1: " + n1 + "  -  R2: " + n2);
-                } else {
-                    System.out.println("SERVER: R1: " + n1 + "  -  R2: " + n2);
-                }
             }
     }
 
@@ -44,7 +39,6 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
     }
 
     public void setRhizomeHolders(BlockPos[] holders) {
-        System.out.println(holders[0]+"   "+holders[1]);
         setRhizomeHolders(holders[0],holders[1]);
     }
 
@@ -56,7 +50,6 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
         BlockPos[] connections = RhizomeUtils.searchConnections(getLevel(),getBlockPos());
         BlockPos[] initialHolders = getRhizomeHolders();
         RhizomeProxyTE proxy = (RhizomeProxyTE) getLevel().getBlockEntity(getBlockPos());
-        System.out.println(proxy==null);
         if(connections.length==0) {
             proxy.setRhizomeHolders(null,null);
         } else if (connections.length==1){
