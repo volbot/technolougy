@@ -49,41 +49,6 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
-        CompoundNBT updateTag = super.getUpdateTag();
-        return getFluidInTank(0).writeToNBT(updateTag);
-    }
-
-    @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-        super.handleUpdateTag(state, tag);
-    }
-
-    @Override
-    public CompoundNBT save(CompoundNBT nbt) {
-        super.save(nbt);
-        return getFluidInTank(0).writeToNBT(nbt);
-    }
-
-    @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        super.load(state, nbt);
-        deserializeNBT(nbt);
-    }
-
-    @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(nbt);
-        this.fill(fluidStack,FluidAction.EXECUTE);
-    }
-
-    @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        return getFluidInTank(0).writeToNBT(nbt);
-    }
-
-    @Override
     public void invalidateCaps() {
         super.invalidateCaps();
         instance.invalidate();
@@ -179,5 +144,40 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
             }
         }
         return drained;
+    }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        CompoundNBT updateTag = super.getUpdateTag();
+        return getFluidInTank(0).writeToNBT(updateTag);
+    }
+
+    @Override
+    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
+        super.handleUpdateTag(state, tag);
+    }
+
+    @Override
+    public CompoundNBT save(CompoundNBT nbt) {
+        super.save(nbt);
+        return getFluidInTank(0).writeToNBT(nbt);
+    }
+
+    @Override
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state, nbt);
+        deserializeNBT(nbt);
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(nbt);
+        this.fill(fluidStack,FluidAction.EXECUTE);
+    }
+
+    @Override
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        return getFluidInTank(0).writeToNBT(nbt);
     }
 }
