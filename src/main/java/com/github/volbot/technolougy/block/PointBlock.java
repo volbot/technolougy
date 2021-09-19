@@ -23,9 +23,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-
 public class PointBlock extends Block {
 
     private BlockPos neighborTemp = null;
@@ -64,11 +61,6 @@ public class PointBlock extends Block {
     }
 
     @Override
-    public void playerDestroy(World world, PlayerEntity playerEntity, BlockPos pos, BlockState state, @Nullable TileEntity tileEntity, ItemStack itemStack) {
-        super.playerDestroy(world, playerEntity, pos, state, tileEntity, itemStack);
-    }
-
-    @Override
     public boolean hasTileEntity(BlockState state) {
         return true;
     }
@@ -89,11 +81,6 @@ public class PointBlock extends Block {
                 ((RhizomeProxyTE)world.getBlockEntity(neighbor)).searchConnections();
             }
         }
-    }
-
-    @Override
-    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
-
     }
 
     @Override

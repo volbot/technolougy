@@ -31,8 +31,10 @@ public class RhizomeUtils {
                 RhizomeProxyTE proxy = (RhizomeProxyTE) world.getBlockEntity(neighbor);
                 BlockPos[] connections = proxy.getRhizomeHolders();
                 for(BlockPos connection : connections) {
-                    if(connection != null && !rhizomes.contains(connection)){
-                        rhizomes.add(connection);
+                    if(connection != null && world.getBlockEntity(connection) instanceof RhizomeTE) {
+                        if (!rhizomes.contains(connection)) {
+                            rhizomes.add(connection);
+                        }
                     }
                 }
             }

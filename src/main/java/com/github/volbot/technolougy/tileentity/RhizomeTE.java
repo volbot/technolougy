@@ -41,7 +41,7 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     @Override
     public void tick() {
         if(debugint==10) {
-            System.out.println(getFluidInTank(0).getAmount());
+            //System.out.println(getFluidInTank(0).getAmount());
             debugint=0;
         } else {
             debugint++;
@@ -63,10 +63,6 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
     @Override
     public int getTanks() {
         return 1;
-    }
-
-    public void signalMerge() {
-        this.setRemoved();
     }
 
     @Nonnull

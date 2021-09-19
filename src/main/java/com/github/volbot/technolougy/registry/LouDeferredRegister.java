@@ -65,13 +65,13 @@ public class LouDeferredRegister {
 
     public static final net.minecraftforge.registries.DeferredRegister<TileEntityType<?>> TILE_ENTITIES = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
 
-    public static final RegistryObject<TileEntityType<RhizomeProxyTE>> rhizomeProxyTE = TILE_ENTITIES.register("rhizome_proxy_te",
-            () -> TileEntityType.Builder.of(RhizomeProxyTE::new, connectionBlock.get())
+    public static final RegistryObject<TileEntityType<RhizomeTE>> rhizomeTE = TILE_ENTITIES.register("rhizome_te",
+            () -> TileEntityType.Builder.of(RhizomeTE::new, pointGen.get())
                     .build(null)
     );
 
-    public static final RegistryObject<TileEntityType<RhizomeTE>> rhizomeTE = TILE_ENTITIES.register("rhizome_te",
-            () -> TileEntityType.Builder.of(RhizomeTE::new, pointGen.get())
+    public static final RegistryObject<TileEntityType<RhizomeProxyTE>> rhizomeProxyTE = TILE_ENTITIES.register("rhizome_proxy_te",
+            () -> TileEntityType.Builder.of(RhizomeProxyTE::new, connectionBlock.get())
                     .build(null)
     );
 
