@@ -9,6 +9,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
@@ -22,6 +23,10 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
         super(LouDeferredRegister.rhizomeProxyTE.get());
     }
 
+    public RhizomeProxyTE(TileEntityType type){
+        super(type);
+    }
+
     private int debugint = 0;
 
     @Override
@@ -30,6 +35,7 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
                 debugint++;
             } else {
                 debugint = 0;
+                System.out.println("pos: "+getBlockPos()+" | n1: "+n1+" | n2: "+n2);
             }
     }
 

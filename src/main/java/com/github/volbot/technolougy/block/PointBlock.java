@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class PointBlock extends Block {
+public class PointBlock extends ConnectionBlock {
 
     private BlockPos neighborTemp = null;
 

@@ -2,10 +2,10 @@ package com.github.volbot.technolougy.registry;
 
 import com.github.volbot.technolougy.Main;
 import com.github.volbot.technolougy.block.ConnectionBlock;
-import com.github.volbot.technolougy.block.FurnaceBlock;
+import com.github.volbot.technolougy.block.SmelterBlock;
 import com.github.volbot.technolougy.block.PointBlock;
 import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
-import com.github.volbot.technolougy.tileentity.FurnaceTE;
+import com.github.volbot.technolougy.tileentity.SmelterTE;
 import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
 import net.minecraft.block.Block;
@@ -41,7 +41,7 @@ public class LouDeferredRegister {
     public static final net.minecraftforge.registries.DeferredRegister<Block> BLOCKS = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MODID);
     public static final RegistryObject<Block> pointGen = BLOCKS.register("point_gen", () -> new PointBlock(Block.Properties.of(Material.HEAVY_METAL)));
     public static final RegistryObject<Block> connectionBlock = BLOCKS.register("connection_block", () -> new ConnectionBlock(Block.Properties.of(Material.HEAVY_METAL)));
-    public static final RegistryObject<Block> furnaceBlock = BLOCKS.register("furnace_block", () -> new FurnaceBlock(Block.Properties.of(Material.HEAVY_METAL)));
+    public static final RegistryObject<Block> smelterBlock = BLOCKS.register("smelter_block", () -> new SmelterBlock(Block.Properties.of(Material.HEAVY_METAL)));
 
 
     public static RegistryObject<FlowingFluidBlock> sugarWaterFluidBlock = BLOCKS.register("sugar_water_fluid_block", () ->
@@ -60,8 +60,8 @@ public class LouDeferredRegister {
                     new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS))
     );
 
-    public static final RegistryObject<Item> furnaceBlockItem = ITEMS.register("furnace_block",
-            () -> new BlockItem( furnaceBlock.get(),
+    public static final RegistryObject<Item> smelterBlockItem = ITEMS.register("smelter_block",
+            () -> new BlockItem( smelterBlock.get(),
                     new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS))
     );
 
@@ -83,8 +83,8 @@ public class LouDeferredRegister {
                     .build(null)
     );
 
-    public static final RegistryObject<TileEntityType<FurnaceTE>> furnaceTE = TILE_ENTITIES.register("furnace_te",
-            () -> TileEntityType.Builder.of(FurnaceTE::new, furnaceBlock.get())
+    public static final RegistryObject<TileEntityType<SmelterTE>> smelterTE = TILE_ENTITIES.register("smelter_te",
+            () -> TileEntityType.Builder.of(SmelterTE::new, smelterBlock.get())
                     .build(null)
     );
 

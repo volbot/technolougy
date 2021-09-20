@@ -6,6 +6,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -17,7 +18,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluidHandler, ICapabilityProvider {
+public class RhizomeTE extends RhizomeProxyTE implements ITickableTileEntity, IFluidHandler, ICapabilityProvider {
 
     private FluidStack fuelTank;
     private int fuelTankLimit;
@@ -29,6 +30,15 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
 
     public RhizomeTE() {
         super(LouDeferredRegister.rhizomeTE.get());
+        init();
+    }
+
+    public RhizomeTE(TileEntityType type){
+        super(type);
+        init();
+    }
+
+    private void init() {
         fuelTank = new FluidStack(Fluids.WATER,0);
         fuelTankLimit = 10000;
     }
@@ -37,11 +47,14 @@ public class RhizomeTE extends TileEntity implements ITickableTileEntity, IFluid
 
     @Override
     public void tick() {
-        if(debugint==10) {
-            //System.out.println(getFluidInTank(0).getAmount());
-            debugint=0;
-        } else {
-            debugint++;
+        super.tick();
+        if(!getLevel().isClientSide()) {
+            if (debugint == 10) {
+                //System.out.println(getFluidInTank(0).getAmount());
+                debugint = 0;
+            } else {
+                debugint++;
+            }
         }
     }
 
