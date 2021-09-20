@@ -31,6 +31,7 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void tick() {
+        if(getLevel().isClientSide())
             if (debugint != 10) {
                 debugint++;
             } else {
@@ -126,31 +127,13 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
     @Override
     public SUpdateTileEntityPacket getUpdatePacket(){
         CompoundNBT nbtTag = new CompoundNBT();
-        if(n1!=null) {
-            nbtTag.putLong("n1", n1.asLong());
-        } else {
-            nbtTag.putLong("n1", 0);
-        }
-        if(n2!=null) {
-            nbtTag.putLong("n2", n2.asLong());
-        } else {
-            nbtTag.putLong("n2", 0);
-        }
+        this.save(nbtTag);
         return new SUpdateTileEntityPacket(getBlockPos(), -1, nbtTag);
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt){
         CompoundNBT tag = pkt.getTag();
-        long tag1 = tag.getLong("n1");
-        long tag2 = tag.getLong("n2");
-        System.out.println(tag1+"   "+tag2);
-        if(tag1!=0){
-            if(tag2!=0){
-                this.setRhizomeHolders(BlockPos.of(tag1), BlockPos.of(tag2));
-            } else {
-                this.setRhizomeHolders(BlockPos.of(tag1), null);
-            }
-        }
+        this.load(getBlockState(),tag);
     }
 }

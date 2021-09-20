@@ -48,9 +48,9 @@ public class RhizomeTE extends RhizomeProxyTE implements ITickableTileEntity, IF
     @Override
     public void tick() {
         super.tick();
-        if(!getLevel().isClientSide()) {
+        if(getLevel().isClientSide()) {
             if (debugint == 10) {
-                //System.out.println(getFluidInTank(0).getAmount());
+                System.out.println(getFluidInTank(0).getAmount());
                 debugint = 0;
             } else {
                 debugint++;
@@ -152,6 +152,7 @@ public class RhizomeTE extends RhizomeProxyTE implements ITickableTileEntity, IF
         return drained;
     }
 
+    /*
     @Override
     public CompoundNBT getUpdateTag() {
         CompoundNBT updateTag = super.getUpdateTag();
@@ -162,6 +163,8 @@ public class RhizomeTE extends RhizomeProxyTE implements ITickableTileEntity, IF
     public void handleUpdateTag(BlockState state, CompoundNBT tag) {
         super.handleUpdateTag(state, tag);
     }
+
+     */
 
     @Override
     public CompoundNBT save(CompoundNBT nbt) {

@@ -12,11 +12,14 @@ import net.minecraft.item.Items;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.RecipeItemHelper;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.util.LazyOptional;
@@ -53,18 +56,18 @@ public class SmelterTE extends RhizomeTE implements IItemHandler, IRecipeHolder,
     @Override
     public void tick() {
         super.tick();
-        if(!getLevel().isClientSide()) {
+        if(getLevel().isClientSide()) {
             {
                 if (debugint == 15) {
                     insertItem(1, Items.ACACIA_LOG.getDefaultInstance(), false);
                     insertItem(0, ItemStack.EMPTY, false);
-                } else if (debugint == 100) {
+                } else if (debugint >= 30) {
                     insertItem(0, Items.ACACIA_LOG.getDefaultInstance(), false);
                     insertItem(1, ItemStack.EMPTY, false);
+                    System.out.println(getStackInSlot(0) + " " + getStackInSlot(1));
                     debugint = 0;
-                }
-                if (((debugint % 10) % 1) == 0) {
-                    //System.out.println(getStackInSlot(0) + " " + getStackInSlot(1));
+                } else if (debugint == 10 || debugint == 20) {
+                    System.out.println(getStackInSlot(0) + " " + getStackInSlot(1));
                 }
                 debugint++;
             }
