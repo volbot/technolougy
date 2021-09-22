@@ -19,24 +19,24 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
     private BlockPos n1;
     private BlockPos n2;
 
-    public RhizomeProxyTE(){
-        super(LouDeferredRegister.rhizomeProxyTE.get());
-    }
-
     public RhizomeProxyTE(TileEntityType type){
         super(type);
+    }
+
+    public RhizomeProxyTE() {
+        super(LouDeferredRegister.rhizomeProxyTE.get());
     }
 
     private int debugint = 0;
 
     @Override
     public void tick() {
-        if(getLevel().isClientSide())
+        if(!getLevel().isClientSide())
             if (debugint != 10) {
                 debugint++;
             } else {
                 debugint = 0;
-                System.out.println("pos: "+getBlockPos()+" | n1: "+n1+" | n2: "+n2);
+                //System.out.println("pos: "+getBlockPos()+" | n1: "+n1+" | n2: "+n2);
             }
     }
 

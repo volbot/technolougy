@@ -13,6 +13,7 @@ import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.*;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -74,17 +75,17 @@ public class LouDeferredRegister {
     public static final net.minecraftforge.registries.DeferredRegister<TileEntityType<?>> TILE_ENTITIES = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
 
     public static final RegistryObject<TileEntityType<RhizomeTE>> rhizomeTE = TILE_ENTITIES.register("rhizome_te",
-            () -> TileEntityType.Builder.of(RhizomeTE::new, pointGen.get())
+            () -> TileEntityType.Builder.of(() -> new RhizomeTE(), pointGen.get())
                     .build(null)
     );
 
     public static final RegistryObject<TileEntityType<RhizomeProxyTE>> rhizomeProxyTE = TILE_ENTITIES.register("rhizome_proxy_te",
-            () -> TileEntityType.Builder.of(RhizomeProxyTE::new, connectionBlock.get())
+            () -> TileEntityType.Builder.of(() -> new RhizomeProxyTE(), connectionBlock.get())
                     .build(null)
     );
 
     public static final RegistryObject<TileEntityType<SmelterTE>> smelterTE = TILE_ENTITIES.register("smelter_te",
-            () -> TileEntityType.Builder.of(SmelterTE::new, smelterBlock.get())
+            () -> TileEntityType.Builder.of(() -> new SmelterTE(), smelterBlock.get())
                     .build(null)
     );
 
