@@ -41,8 +41,6 @@ public class AbstractRhizomaticTankBlock extends ConnectionBlock {
                     if(rhizome.fill(new FluidStack(LouDeferredRegister.sugarWaterFluid.get().getFluid(), 1000), IFluidHandler.FluidAction.EXECUTE)>0
                             && !player.isCreative()) {
                         player.setItemSlot(EquipmentSlotType.MAINHAND, Items.BUCKET.getDefaultInstance());
-                    } else {
-                        System.out.println("FILL FAILED");
                     }
                 }
                 return ActionResultType.SUCCESS;
@@ -53,9 +51,10 @@ public class AbstractRhizomaticTankBlock extends ConnectionBlock {
                 }
                 return ActionResultType.SUCCESS;
             }
-            return ActionResultType.SUCCESS;
+            return ActionResultType.FAIL;
+        } else {
+            return ActionResultType.PASS;
         }
-        return ActionResultType.PASS;
     }
 
     @Override
@@ -83,6 +82,6 @@ public class AbstractRhizomaticTankBlock extends ConnectionBlock {
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world){
-        return new RhizomeTE();
+        return null;
     }
 }

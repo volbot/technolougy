@@ -8,19 +8,24 @@ import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
 import com.github.volbot.technolougy.tileentity.SmelterTE;
 import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
+import com.github.volbot.technolougy.tileentity.container.SmelterContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.*;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import java.awt.*;
 
 import static com.github.volbot.technolougy.Main.MODID;
 
@@ -88,6 +93,12 @@ public class LouDeferredRegister {
             () -> TileEntityType.Builder.of(() -> new SmelterTE(), smelterBlock.get())
                     .build(null)
     );
+
+    //REGISTER CONTAINERS
+    public static final net.minecraftforge.registries.DeferredRegister<ContainerType<?>> CONTAINERS = net.minecraftforge.registries.DeferredRegister.create(ForgeRegistries.CONTAINERS, MODID);
+
+    public static final RegistryObject<ContainerType<SmelterContainer>> smelterContainer = CONTAINERS.register("smelter_container",
+            () -> IForgeContainerType.create(((windowId, inv, data) -> new SmelterContainer(windowId, inv))));
 
     /*
         Method to initialize the game data of the Solution fluid.

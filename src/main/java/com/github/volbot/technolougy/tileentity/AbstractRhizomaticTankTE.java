@@ -7,6 +7,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -109,8 +110,9 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
                 System.out.println(quantity);
                 return quantity;
             }
+        } else {
+            return 0;
         }
-        return 0;
     }
 
     @Nonnull
@@ -178,6 +180,11 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
+        serializeNBT(nbt);
+        return nbt;
+    }
+
+    public CompoundNBT serializeNBT(CompoundNBT nbt) {
         return getFluidInTank(0).writeToNBT(nbt);
     }
 }

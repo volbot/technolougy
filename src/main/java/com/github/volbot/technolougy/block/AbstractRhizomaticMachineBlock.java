@@ -2,6 +2,7 @@ package com.github.volbot.technolougy.block;
 
 import com.github.volbot.technolougy.tileentity.AbstractRhizomaticMachineTE;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ContainerBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.tileentity.TileEntity;
@@ -39,6 +40,7 @@ public class AbstractRhizomaticMachineBlock extends AbstractRhizomaticTankBlock 
     protected void openContainer(World world, BlockPos pos, PlayerEntity entity) {
         TileEntity te = world.getBlockEntity(pos);
         if (te instanceof AbstractRhizomaticMachineTE) {
+            System.out.println("MENU");
             entity.openMenu((INamedContainerProvider) te);
         }
     }

@@ -1,5 +1,6 @@
 package com.github.volbot.technolougy;
 
+import com.github.volbot.technolougy.registry.ClientRegistry;
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -19,6 +20,7 @@ public class Main {
         LouDeferredRegister.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         LouDeferredRegister.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         LouDeferredRegister.TILE_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        LouDeferredRegister.CONTAINERS.register(FMLJavaModLoadingContext.get().getModEventBus());
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -26,6 +28,7 @@ public class Main {
     private void setup(final FMLCommonSetupEvent event) { }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
+        ClientRegistry.onClientSetupEvent(event);
     }
 
 }

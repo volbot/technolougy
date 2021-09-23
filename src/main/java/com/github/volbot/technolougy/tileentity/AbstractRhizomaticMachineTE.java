@@ -1,20 +1,25 @@
 package com.github.volbot.technolougy.tileentity;
 
-import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.*;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.RecipeItemHelper;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.IIntArray;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.util.LazyOptional;
@@ -24,7 +29,7 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implements IItemHandler, IRecipeHolder, IRecipeHelperPopulator {
+public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implements IItemHandler, IRecipeHolder, IRecipeHelperPopulator, INamedContainerProvider {
 
     public AbstractRhizomaticMachineTE(TileEntityType type){
         super(type);
@@ -44,11 +49,40 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
 
     private LazyOptional<IItemHandler> item_instance = LazyOptional.of(ITEM_CAP::getDefaultInstance);
 
+    protected final IIntArray dataAccess = new IIntArray() {
+        public int get(int i) {
+            switch(i) {
+                case 0:
+                    return AbstractRhizomaticMachineTE.this.cookingProgress;
+                case 1:
+                    return AbstractRhizomaticMachineTE.this.cookingTotalTime;
+                default:
+                    return 0;
+            }
+        }
+
+        public void set(int i, int val) {
+            switch(i) {
+                case 0:
+                    AbstractRhizomaticMachineTE.this.cookingProgress = val;
+                case 1:
+                    AbstractRhizomaticMachineTE.this.cookingTotalTime = val;
+            }
+        }
+
+        public int getCount() {
+            return 4;
+        }
+    };
+
     @Override
     protected void init() {
         super.init();
         this.cookingProgress = 0;
     }
+
+
+
 
     @Override
     public void tick() {
@@ -194,15 +228,7 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
         super.save(nbt);
-        nbt.putInt("CookTime", this.cookingProgress);
-        nbt.putInt("CookTimeTotal", this.cookingTotalTime);
-        ItemStackHelper.saveAllItems(nbt, this.items);
-        CompoundNBT compoundnbt = new CompoundNBT();
-        this.recipesUsed.forEach((p_235643_1_, p_235643_2_) -> {
-            compoundnbt.putInt(p_235643_1_.toString(), p_235643_2_);
-        });
-        nbt.put("RecipesUsed", compoundnbt);
-        return nbt;
+        return serializeNBT();
     }
 
     @Override
@@ -227,6 +253,11 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
+        serializeNBT(nbt);
+        return nbt;
+    }
+
+    public CompoundNBT serializeNBT(CompoundNBT nbt) {
         nbt.putInt("CookTime", this.cookingProgress);
         nbt.putInt("CookTimeTotal", this.cookingTotalTime);
         ItemStackHelper.saveAllItems(nbt, this.items);
@@ -236,5 +267,16 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
         });
         nbt.put("RecipesUsed", compoundnbt);
         return nbt;
+    }
+
+    @Nullable
+    @Override
+    public Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player) {
+        return null;
+    }
+
+    @Override
+    public ITextComponent getDisplayName() {
+        return new StringTextComponent("Rhizomatic Smelter");
     }
 }
