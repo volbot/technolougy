@@ -25,11 +25,12 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implements IItemHandler, IRecipeHolder, IRecipeHelperPopulator, INamedContainerProvider {
+public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implements IItemHandlerModifiable, IRecipeHolder, IRecipeHelperPopulator, INamedContainerProvider {
 
     public AbstractRhizomaticMachineTE(TileEntityType type){
         super(type);
@@ -81,15 +82,16 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
         this.cookingProgress = 0;
     }
 
-
-
+    public IIntArray getDataAccess() {
+        return dataAccess;
+    }
 
     @Override
     public void tick() {
         super.tick();
         if (!getLevel().isClientSide()) { //Running on server
             ItemStack input = getStackInSlot(0);
-            System.out.println("INPUT: " + input + " | OUTPUT: " + this.getStackInSlot(1));
+            //System.out.println("INPUT: " + input + " | OUTPUT: " + this.getStackInSlot(1));
             if (!input.isEmpty()) { //Machine can run
                 IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
                 //System.out.println(canBurn(recipe));
@@ -98,6 +100,7 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
                     if (this.cookingProgress == this.cookingTotalTime) { //Done cooking
                         this.cookingProgress = 0;
                         drain(10, FluidAction.EXECUTE);
+                        System.out.println("fuck");
                         extractItem(0, 1, false);
                         this.setRecipeUsed(recipe);
                         insertItem(1, new ItemStack(recipe.getResultItem().getItem(), 1), false);
@@ -206,23 +209,30 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        ItemStack item = this.items.get(slot);
-        if (item != ItemStack.EMPTY && item.getCount() >= amount) {
-            this.items.get(slot).shrink(amount);
-            return new ItemStack(item.getItem(), item.getCount() - 1);
-        } else {
+        ItemStack returnStack = this.items.get(slot);
+        if (returnStack.isEmpty()) {
             return ItemStack.EMPTY;
         }
+        System.out.println("ATTEMPTING TO EXTRACT " + amount + " FROM " + returnStack);
+        if (returnStack.getCount() > amount) {
+            returnStack.setCount(returnStack.getCount() - amount);
+            this.items.set(slot, returnStack);
+            returnStack = new ItemStack(returnStack.getItem(), amount);
+        } else {
+            this.items.set(slot, ItemStack.EMPTY);
+        }
+        System.out.println("EXTRACTED: " + returnStack);
+        return returnStack;
     }
 
     @Override
     public int getSlotLimit(int slot) {
-        return 0;
+        return 64;
     }
 
     @Override
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-        return false;
+        return true;
     }
 
     @Override
@@ -278,5 +288,11 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
     @Override
     public ITextComponent getDisplayName() {
         return new StringTextComponent("Rhizomatic Smelter");
+    }
+
+    @Override
+    public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+        System.out.println("ITEM SET FROM "+this.items.get(slot)+" TO "+stack);
+        this.items.set(slot,stack);
     }
 }

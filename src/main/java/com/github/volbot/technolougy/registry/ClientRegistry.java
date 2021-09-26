@@ -8,7 +8,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientRegistry {
     @SubscribeEvent
     public static void onClientSetupEvent(FMLClientSetupEvent event) {
-        System.out.println("reggie");
         ScreenManager.register(LouDeferredRegister.smelterContainer.get(), SmelterContainerScreen::new);
     }
 }

@@ -10,11 +10,11 @@ import net.minecraft.util.IIntArray;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 
 public class SmelterContainer extends AbstractRhizomaticMachineContainer{
-    public SmelterContainer(int containerID, PlayerInventory inventory, SmelterTE smelterTE, IIntArray dataAccess) {
-        super(LouDeferredRegister.smelterContainer.get(), IRecipeType.SMELTING,  containerID, inventory, smelterTE, dataAccess);
+    public SmelterContainer(int containerID, PlayerInventory inventory, SmelterTE smelterTE) {
+        super(LouDeferredRegister.smelterContainer.get(), IRecipeType.SMELTING,  containerID, inventory, smelterTE, smelterTE.getDataAccess());
     }
 
     public SmelterContainer(int containerID, PlayerInventory inventory){
-        super(LouDeferredRegister.smelterContainer.get(), IRecipeType.SMELTING, containerID, inventory);
+        super(LouDeferredRegister.smelterContainer.get(), IRecipeType.SMELTING, containerID, inventory, LouDeferredRegister.smelterTE.get().create(), LouDeferredRegister.smelterTE.get().create().getDataAccess());
     }
 }

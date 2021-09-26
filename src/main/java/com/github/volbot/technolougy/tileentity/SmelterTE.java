@@ -51,6 +51,6 @@ public class SmelterTE extends AbstractRhizomaticMachineTE {
     @Override
     public Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player) {
         System.out.println("CREATE MENU");
-        return new SmelterContainer(containerID, inventory, this, this.dataAccess);
+        return new SmelterContainer(containerID, inventory, this);
     }
 }
