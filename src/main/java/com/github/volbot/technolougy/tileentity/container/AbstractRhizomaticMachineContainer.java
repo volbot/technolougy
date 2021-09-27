@@ -72,7 +72,6 @@ public class AbstractRhizomaticMachineContainer extends Container {
         @Nonnull
         @Override
         public ItemStack remove(int amount) {
-            System.out.println("REMOVAL AMOUNT: "+amount);
             return this.getItemHandler().extractItem(this.getSlotIndex(), amount, false);
         }
     }

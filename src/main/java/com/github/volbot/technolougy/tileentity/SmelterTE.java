@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 import javax.annotation.Nullable;
 
@@ -50,7 +52,11 @@ public class SmelterTE extends AbstractRhizomaticMachineTE {
     @Nullable
     @Override
     public Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player) {
-        System.out.println("CREATE MENU");
         return new SmelterContainer(containerID, inventory, this);
+    }
+
+    @Override
+    public ITextComponent getDisplayName() {
+        return new StringTextComponent("Rhizomatic Smelter");
     }
 }

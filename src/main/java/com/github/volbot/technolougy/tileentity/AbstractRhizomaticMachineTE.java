@@ -30,9 +30,9 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implements IItemHandlerModifiable, IRecipeHolder, IRecipeHelperPopulator, INamedContainerProvider {
+public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implements IItemHandlerModifiable, IRecipeHolder, IRecipeHelperPopulator, INamedContainerProvider {
 
-    public AbstractRhizomaticMachineTE(TileEntityType type){
+    public AbstractRhizomaticMachineTE(TileEntityType type) {
         super(type);
         init();
     }
@@ -52,7 +52,7 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
 
     protected final IIntArray dataAccess = new IIntArray() {
         public int get(int i) {
-            switch(i) {
+            switch (i) {
                 case 0:
                     return AbstractRhizomaticMachineTE.this.cookingProgress;
                 case 1:
@@ -63,7 +63,7 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
         }
 
         public void set(int i, int val) {
-            switch(i) {
+            switch (i) {
                 case 0:
                     AbstractRhizomaticMachineTE.this.cookingProgress = val;
                 case 1:
@@ -91,16 +91,13 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
         super.tick();
         if (!getLevel().isClientSide()) { //Running on server
             ItemStack input = getStackInSlot(0);
-            //System.out.println("INPUT: " + input + " | OUTPUT: " + this.getStackInSlot(1));
             if (!input.isEmpty()) { //Machine can run
                 IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
-                //System.out.println(canBurn(recipe));
                 if (canBurn(recipe) && drain(10, FluidAction.SIMULATE).getAmount() == 10) { //Recipe is valid
                     cookingProgress++;
                     if (this.cookingProgress == this.cookingTotalTime) { //Done cooking
                         this.cookingProgress = 0;
                         drain(10, FluidAction.EXECUTE);
-                        System.out.println("fuck");
                         extractItem(0, 1, false);
                         this.setRecipeUsed(recipe);
                         insertItem(1, new ItemStack(recipe.getResultItem().getItem(), 1), false);
@@ -192,37 +189,29 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         ItemStack curr = getStackInSlot(slot);
-        if (curr.isEmpty()) {
-            return this.items.set(slot, stack);
-        } else if (curr.getCount() != this.maxStackSize && curr.getItem().equals(stack.getItem())) {
+        if(stack.isEmpty()){
+            if(!simulate){
+                this.items.set(slot, stack);
+            }
+            return curr;
+        }
+        if (!curr.isEmpty() && curr.getCount() != this.maxStackSize && curr.getItem().equals(stack.getItem())) {
             if (this.maxStackSize - curr.getCount() > stack.getCount()) {
                 stack.setCount(curr.getCount() + stack.getCount());
             } else {
                 stack.setCount(this.maxStackSize);
             }
-            return this.items.set(slot, stack);
-        } else {
-            return ItemStack.EMPTY;
         }
+        if (!simulate) {
+            this.items.set(slot, stack);
+        }
+        return curr;
     }
 
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        ItemStack returnStack = this.items.get(slot);
-        if (returnStack.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-        System.out.println("ATTEMPTING TO EXTRACT " + amount + " FROM " + returnStack);
-        if (returnStack.getCount() > amount) {
-            returnStack.setCount(returnStack.getCount() - amount);
-            this.items.set(slot, returnStack);
-            returnStack = new ItemStack(returnStack.getItem(), amount);
-        } else {
-            this.items.set(slot, ItemStack.EMPTY);
-        }
-        System.out.println("EXTRACTED: " + returnStack);
-        return returnStack;
+        return insertItem(slot,ItemStack.EMPTY,simulate);
     }
 
     @Override
@@ -281,18 +270,13 @@ public class AbstractRhizomaticMachineTE extends AbstractRhizomaticTankTE implem
 
     @Nullable
     @Override
-    public Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player) {
-        return null;
-    }
+    public abstract Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player);
 
     @Override
-    public ITextComponent getDisplayName() {
-        return new StringTextComponent("Rhizomatic Smelter");
-    }
+    public abstract ITextComponent getDisplayName();
 
     @Override
     public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
-        System.out.println("ITEM SET FROM "+this.items.get(slot)+" TO "+stack);
-        this.items.set(slot,stack);
+        this.items.set(slot, stack);
     }
 }
