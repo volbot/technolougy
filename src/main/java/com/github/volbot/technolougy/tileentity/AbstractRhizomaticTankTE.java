@@ -99,15 +99,12 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
                 if(!action.simulate()) {
                     fuelTank.setAmount(fuelTankLimit);
                     setChanged();
-                }
-                System.out.println(fuelTankLimit-initialQuantity);
-                return fuelTankLimit - initialQuantity;
+                }return fuelTankLimit - initialQuantity;
             } else {
                 if(!action.simulate()) {
                     fuelTank.setAmount(initialQuantity + quantity);
                     setChanged();
                 }
-                System.out.println(quantity);
                 return quantity;
             }
         } else {

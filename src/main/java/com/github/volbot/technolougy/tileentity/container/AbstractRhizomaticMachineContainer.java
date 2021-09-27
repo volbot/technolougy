@@ -1,16 +1,20 @@
 package com.github.volbot.technolougy.tileentity.container;
 
+import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
+import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.IIntArray;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -37,6 +41,24 @@ public class AbstractRhizomaticMachineContainer extends Container {
         this.addSlot(new RhizomeMachineSlot(iItemHandler, 1, 116, 35) {
             @Override
             public boolean mayPlace(@Nonnull ItemStack stack) {
+                return false;
+            }
+        });
+        this.addSlot(new RhizomeMachineSlot(iItemHandler, 2, 20, 50) {
+            @Override
+            public boolean mayPlace(@Nonnull ItemStack stack) {
+                if(stack.getItem() instanceof BucketItem){
+                    System.out.println("ITEM BUCKET");
+                    BucketItem item = (BucketItem)stack.getItem();
+                    System.out.println(item.getFluid());
+                    if(item.getFluid().isSame(LouDeferredRegister.sugarWaterFluid.get())){
+                        System.out.println("BUCKET IS RHIZOME FLUID");
+                        return true;
+                    } else if(item.getFluid().isSame(FluidStack.EMPTY.getFluid())){
+                        System.out.println("BUCKET EMPTY");
+                        return true;
+                    }
+                }
                 return false;
             }
         });

@@ -7,7 +7,9 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.*;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
@@ -23,6 +25,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -37,7 +40,7 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
         init();
     }
 
-    protected NonNullList<ItemStack> items = NonNullList.withSize(2, ItemStack.EMPTY);
+    protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
 
     protected int cookingProgress;
     protected int cookingTotalTime;
@@ -90,6 +93,11 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     public void tick() {
         super.tick();
         if (!getLevel().isClientSide()) { //Running on server
+            ItemStack fluidBucket = getStackInSlot(2);
+            if(!fluidBucket.isEmpty()){
+                setStackInSlot(2,Items.BUCKET.getDefaultInstance());
+                this.fill(new FluidStack(((BucketItem)fluidBucket.getItem()).getFluid(),1000),FluidAction.EXECUTE);
+            }
             ItemStack input = getStackInSlot(0);
             if (!input.isEmpty()) { //Machine can run
                 IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
@@ -166,12 +174,19 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap instanceof IFluidHandler) {
-            return super.getCapability(cap, side);
-        } else if (cap instanceof IInventory) {
+        if (cap instanceof IItemHandler) {
+            /*
+            if(side==Direction.UP){
+                return item_instance.cast();
+            } else {
+                return item_instance.cast();
+            }
+
+             */
             return item_instance.cast();
+        } else {
+            return super.getCapability(cap, side);
         }
-        return null;
     }
 
     @Override
@@ -189,8 +204,8 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         ItemStack curr = getStackInSlot(slot);
-        if(stack.isEmpty()){
-            if(!simulate){
+        if (stack.isEmpty()) {
+            if (!simulate) {
                 this.items.set(slot, stack);
             }
             return curr;
@@ -211,7 +226,20 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        return insertItem(slot,ItemStack.EMPTY,simulate);
+        ItemStack stack = getStackInSlot(slot);
+        ItemStack returnStack = ItemStack.EMPTY;
+        if(!stack.isEmpty()) {
+            returnStack = stack;
+            if(!simulate){
+                if (stack.getCount() <= amount) {
+                    stack = ItemStack.EMPTY;
+                } else {
+                    stack.setCount(stack.getCount() - amount);
+                }
+                this.items.set(slot, stack);
+            }
+        }
+        return returnStack;
     }
 
     @Override
