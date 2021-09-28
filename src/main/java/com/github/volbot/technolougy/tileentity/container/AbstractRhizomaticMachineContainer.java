@@ -14,6 +14,8 @@ import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.IIntArray;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -22,14 +24,14 @@ import javax.annotation.Nonnull;
 
 public class AbstractRhizomaticMachineContainer extends Container {
 
-    private final IIntArray data;
+    private final RhizomaticMachineStateData data;
     protected final World level;
     private final IRecipeType recipeType;
-
+    private int goal = -1;
 
     protected AbstractRhizomaticMachineContainer(ContainerType<?> containerType, IRecipeType<? extends AbstractCookingRecipe> recipeType, int containerID, PlayerInventory inventory, IItemHandler iItemHandler, IIntArray iIntArray) {
         super(containerType, containerID);
-        this.data = iIntArray;
+        this.data = (RhizomaticMachineStateData) iIntArray;
         this.level = inventory.player.level;
         this.recipeType = recipeType;
         this.addSlot(new RhizomeMachineSlot(iItemHandler, 0, 56, 35) {
@@ -73,7 +75,22 @@ public class AbstractRhizomaticMachineContainer extends Container {
             this.addSlot(new Slot(inventory, k, 8 + k * 18, 142));
         }
 
-        this.addDataSlots(iIntArray);
+        this.addDataSlots(data);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public int getBurnProgress() {
+        int prog = this.data.get(0);
+        if(goal==-1){
+            goal = this.data.get(1);
+        }
+        if(goal!=0 && prog!=0){
+            System.out.println("PROG: "+prog+" | GOAL: "+goal+" | CALC: "+(prog*24)/goal);
+            return (prog*24)/goal;
+        } else {
+            return 0;
+        }
+        //return goal != 0 && prog != 0 ? prog * 24 / goal : 0;
     }
 
     @Override

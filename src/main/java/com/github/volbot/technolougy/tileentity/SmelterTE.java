@@ -34,7 +34,7 @@ public class SmelterTE extends AbstractRhizomaticMachineTE {
         this.fuelTankLimit=5000;
         this.recipeType = IRecipeType.SMELTING;
         this.maxStackSize=64;
-        this.cookingTotalTime=15;
+        this.cookingTotalTime=200;
         debugint=-1;
     }
 

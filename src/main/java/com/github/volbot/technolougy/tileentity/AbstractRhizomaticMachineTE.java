@@ -1,5 +1,6 @@
 package com.github.volbot.technolougy.tileentity;
 
+import com.github.volbot.technolougy.tileentity.container.RhizomaticMachineStateData;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,12 +22,10 @@ import net.minecraft.util.IIntArray;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
@@ -37,7 +36,6 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
 
     public AbstractRhizomaticMachineTE(TileEntityType type) {
         super(type);
-        init();
     }
 
     protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
@@ -53,40 +51,35 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
 
     private LazyOptional<IItemHandler> item_instance = LazyOptional.of(ITEM_CAP::getDefaultInstance);
 
-    protected final IIntArray dataAccess = new IIntArray() {
-        public int get(int i) {
-            switch (i) {
-                case 0:
-                    return AbstractRhizomaticMachineTE.this.cookingProgress;
-                case 1:
-                    return AbstractRhizomaticMachineTE.this.cookingTotalTime;
-                default:
-                    return 0;
-            }
-        }
-
-        public void set(int i, int val) {
-            switch (i) {
-                case 0:
-                    AbstractRhizomaticMachineTE.this.cookingProgress = val;
-                case 1:
-                    AbstractRhizomaticMachineTE.this.cookingTotalTime = val;
-            }
-        }
-
-        public int getCount() {
-            return 4;
-        }
-    };
+    protected IIntArray dataAccess;
 
     @Override
     protected void init() {
         super.init();
+        dataAccess=new RhizomaticMachineStateData(this);
         this.cookingProgress = 0;
+        this.cookingTotalTime = 200;
     }
 
     public IIntArray getDataAccess() {
         return dataAccess;
+    }
+
+    public int getCookingProgress() {
+        return cookingProgress;
+    }
+
+    public int getCookingTotalTime() {
+        System.out.println("OH MY OD IM BEGGING "+cookingTotalTime);
+        return cookingTotalTime;
+    }
+
+    public void setCookingProgress(int cookingProgress) {
+        this.cookingProgress = cookingProgress;
+    }
+
+    public void setCookingTotalTime(int cookingTotalTime) {
+        this.cookingTotalTime = cookingTotalTime;
     }
 
     @Override
@@ -94,15 +87,16 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
         super.tick();
         if (!getLevel().isClientSide()) { //Running on server
             ItemStack fluidBucket = getStackInSlot(2);
-            if(!fluidBucket.isEmpty()){
-                setStackInSlot(2,Items.BUCKET.getDefaultInstance());
-                this.fill(new FluidStack(((BucketItem)fluidBucket.getItem()).getFluid(),1000),FluidAction.EXECUTE);
+            if (!fluidBucket.isEmpty()) {
+                setStackInSlot(2, Items.BUCKET.getDefaultInstance());
+                this.fill(new FluidStack(((BucketItem) fluidBucket.getItem()).getFluid(), 1000), FluidAction.EXECUTE);
             }
             ItemStack input = getStackInSlot(0);
             if (!input.isEmpty()) { //Machine can run
                 IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
                 if (canBurn(recipe) && drain(10, FluidAction.SIMULATE).getAmount() == 10) { //Recipe is valid
                     cookingProgress++;
+                    System.out.println("INTERNAL PROG: " + cookingProgress + " | INTERNAL GOAL: " + cookingTotalTime);
                     if (this.cookingProgress == this.cookingTotalTime) { //Done cooking
                         this.cookingProgress = 0;
                         drain(10, FluidAction.EXECUTE);
@@ -228,9 +222,9 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
         ItemStack stack = getStackInSlot(slot);
         ItemStack returnStack = ItemStack.EMPTY;
-        if(!stack.isEmpty()) {
+        if (!stack.isEmpty()) {
             returnStack = stack;
-            if(!simulate){
+            if (!simulate) {
                 if (stack.getCount() <= amount) {
                     stack = ItemStack.EMPTY;
                 } else {
@@ -267,7 +261,7 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        this.items = NonNullList.withSize(2, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
         ItemStackHelper.loadAllItems(nbt, this.items);
         this.cookingProgress = nbt.getInt("CookTime");
         this.cookingTotalTime = nbt.getInt("CookTimeTotal");

@@ -28,7 +28,6 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
 
     public AbstractRhizomaticTankTE(TileEntityType type){
         super(type);
-        init();
     }
 
     protected void init() {
