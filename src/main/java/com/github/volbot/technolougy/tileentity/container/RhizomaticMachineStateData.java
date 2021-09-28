@@ -2,6 +2,7 @@ package com.github.volbot.technolougy.tileentity.container;
 
 import com.github.volbot.technolougy.tileentity.AbstractRhizomaticMachineTE;
 import net.minecraft.util.IIntArray;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class RhizomaticMachineStateData implements IIntArray {
     private AbstractRhizomaticMachineTE handler;
@@ -11,13 +12,15 @@ public class RhizomaticMachineStateData implements IIntArray {
 
     @Override
     public int get(int i) {
-        System.out.println("FUCKING PLEASE");
         switch (i) {
             case 0:
                 return handler.getCookingProgress();
             case 1:
-                System.out.println("PLEASE GIVE ME THT EOTAL "+ handler.getCookingTotalTime());
                 return handler.getCookingTotalTime();
+            case 2:
+                return handler.getFluidInTank(0).getAmount();
+            case 3:
+                return handler.getTankCapacity(0);
             default:
                 return 0;
         }
@@ -28,13 +31,19 @@ public class RhizomaticMachineStateData implements IIntArray {
         switch (i) {
             case 0:
                 handler.setCookingProgress(val);
+                break;
             case 1:
                 handler.setCookingTotalTime(val);
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
         }
     }
 
     @Override
     public int getCount() {
-        return 2;
+        return 4;
     }
 }

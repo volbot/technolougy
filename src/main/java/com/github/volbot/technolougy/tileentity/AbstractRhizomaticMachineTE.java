@@ -70,7 +70,6 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     }
 
     public int getCookingTotalTime() {
-        System.out.println("OH MY OD IM BEGGING "+cookingTotalTime);
         return cookingTotalTime;
     }
 

@@ -1,14 +1,13 @@
 package com.github.volbot.technolougy.tileentity.container;
 
-import com.github.volbot.technolougy.block.fluid.RhizomeFuelFluid;
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
+import com.ibm.icu.text.AlphabeticIndex;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.*;
 import net.minecraft.item.BucketItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
@@ -27,41 +26,29 @@ public class AbstractRhizomaticMachineContainer extends Container {
     private final RhizomaticMachineStateData data;
     protected final World level;
     private final IRecipeType recipeType;
-    private int goal = -1;
+    private int max = -1;
 
     protected AbstractRhizomaticMachineContainer(ContainerType<?> containerType, IRecipeType<? extends AbstractCookingRecipe> recipeType, int containerID, PlayerInventory inventory, IItemHandler iItemHandler, IIntArray iIntArray) {
         super(containerType, containerID);
         this.data = (RhizomaticMachineStateData) iIntArray;
         this.level = inventory.player.level;
         this.recipeType = recipeType;
-        this.addSlot(new RhizomeMachineSlot(iItemHandler, 0, 56, 35) {
+        this.addSlot(new RhizomeMachineSlot(iItemHandler, 0, 61, 35) {
             @Override
             public boolean mayPlace(@Nonnull ItemStack stack) {
                 return canSmelt(stack);
             }
         });
-        this.addSlot(new RhizomeMachineSlot(iItemHandler, 1, 116, 35) {
+        this.addSlot(new RhizomeMachineSlot(iItemHandler, 1, 117, 35) {
             @Override
             public boolean mayPlace(@Nonnull ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new RhizomeMachineSlot(iItemHandler, 2, 20, 50) {
+        this.addSlot(new RhizomeMachineSlot(iItemHandler, 2, 11, 53) {
             @Override
             public boolean mayPlace(@Nonnull ItemStack stack) {
-                if(stack.getItem() instanceof BucketItem){
-                    System.out.println("ITEM BUCKET");
-                    BucketItem item = (BucketItem)stack.getItem();
-                    System.out.println(item.getFluid());
-                    if(item.getFluid().isSame(LouDeferredRegister.sugarWaterFluid.get())){
-                        System.out.println("BUCKET IS RHIZOME FLUID");
-                        return true;
-                    } else if(item.getFluid().isSame(FluidStack.EMPTY.getFluid())){
-                        System.out.println("BUCKET EMPTY");
-                        return true;
-                    }
-                }
-                return false;
+                return isFuel(stack);
             }
         });
 
@@ -81,12 +68,122 @@ public class AbstractRhizomaticMachineContainer extends Container {
     @OnlyIn(Dist.CLIENT)
     public int getBurnProgress() {
         int prog = this.data.get(0);
-        if(goal==-1){
-            goal = this.data.get(1);
+        if(max ==-1){
+            max = this.data.get(1);
         }
-        if(goal!=0 && prog!=0){
-            System.out.println("PROG: "+prog+" | GOAL: "+goal+" | CALC: "+(prog*24)/goal);
-            return (prog*24)/goal;
+        if(max !=0 && prog!=0){
+            System.out.println("PROG: "+prog+" | GOAL: "+ max +" | CALC: "+(prog*24)/ max);
+            return (prog*24)/ max;
+        } else {
+            return 0;
+        }
+        //return goal != 0 && prog != 0 ? prog * 24 / goal : 0;
+    }
+
+    public ItemStack quickMoveStack(PlayerEntity player, int islot) {
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(islot);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
+            itemstack = itemstack1.copy();
+            if(islot==0||islot==2){
+                if (!this.moveItemStackTo(itemstack1, 3, 39, true)) {
+                    return ItemStack.EMPTY;
+                }
+                slot.onQuickCraft(itemstack1, itemstack);
+            } else if (islot!=1){
+                if (this.canSmelt(itemstack1)) {
+                    if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (this.isFuel(itemstack1)) {
+                    if (!this.moveItemStackTo(itemstack1, 2, 3, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+                if (islot < 30) {
+                    if (!this.moveItemStackTo(itemstack1, 30, 39, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (islot < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!this.moveItemStackTo(itemstack1, 3, 39, false)) {
+                return ItemStack.EMPTY;
+            }
+
+            if (itemstack1.isEmpty()) {
+                slot.set(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+            if (itemstack1.getCount() == itemstack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+            slot.onTake(player, itemstack1);
+        }
+        return itemstack;
+    }
+
+    /*
+    public ItemStack quickMoveStack(PlayerEntity player, int islot) {
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(islot);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
+            itemstack = itemstack1.copy();
+            if (islot == 2) {
+                if (!this.moveItemStackTo(itemstack1, 3, 39, true)) {
+                    return ItemStack.EMPTY;
+                }
+
+                slot.onQuickCraft(itemstack1, itemstack);
+            } else if (islot != 1 && islot != 0) {
+                if (this.canSmelt(itemstack1)) {
+                    if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (this.isFuel(itemstack1)) {
+                    if (!this.moveItemStackTo(itemstack1, 1, 2, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (islot >= 3 && islot < 30) {
+                    if (!this.moveItemStackTo(itemstack1, 30, 39, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (islot >= 30 && islot < 39 && !this.moveItemStackTo(itemstack1, 3, 30, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!this.moveItemStackTo(itemstack1, 3, 39, false)) {
+                return ItemStack.EMPTY;
+            }
+
+            if (itemstack1.isEmpty()) {
+                slot.set(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+
+            if (itemstack1.getCount() == itemstack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+
+            slot.onTake(player, itemstack1);
+        }
+
+        return itemstack;
+    }
+
+     */
+
+    @OnlyIn(Dist.CLIENT)
+    public int getFluidQuantity() {
+        int curr = this.data.get(2);
+        if(max ==-1){
+            max = this.data.get(3);
+        }
+        if(max !=0 && curr!=0){
+            return (curr*24)/ max;
         } else {
             return 0;
         }
@@ -100,6 +197,17 @@ public class AbstractRhizomaticMachineContainer extends Container {
 
     protected boolean canSmelt(ItemStack stack) {
         return this.level.getRecipeManager().getRecipeFor(this.recipeType, new Inventory(stack), this.level).isPresent();
+    }
+
+    protected boolean isFuel(ItemStack stack) {
+        Item item = stack.getItem();
+        if(item instanceof BucketItem) {
+            BucketItem bucket = (BucketItem) item;
+            if (bucket.getFluid().isSame(LouDeferredRegister.sugarWaterFluid.get())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected class RhizomeMachineSlot extends SlotItemHandler {

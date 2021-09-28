@@ -20,12 +20,14 @@ public class AbstractContainerScreen<T extends AbstractRhizomaticMachineContaine
     @Override
     protected void renderBg(MatrixStack stack, float p_230450_2_, int p_230450_3_, int p_230450_4_) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(new ResourceLocation("textures/gui/container/furnace.png"));
+        this.minecraft.getTextureManager().bind(new ResourceLocation("technolougy:textures/gui/container/smelter.png"));
         int i = this.leftPos;
         int j = this.topPos;
         this.blit(stack, i, j, 0, 0, this.imageWidth, this.imageHeight);
         int l = this.menu.getBurnProgress();
-        this.blit(stack, i + 79, j + 34, 176, 14, l + 1, 16);
+        this.blit(stack, i + 83, j + 34, 176, 14, l + 1, 16);
+        int fluidQuantity = this.menu.getFluidQuantity();
+        this.blit(stack, i + 10, j + 6, 18, 43, 22, (fluidQuantity/45));
     }
 
     @Override

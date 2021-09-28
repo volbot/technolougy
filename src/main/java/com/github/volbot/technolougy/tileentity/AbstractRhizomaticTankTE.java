@@ -69,11 +69,7 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
     @Nonnull
     @Override
     public FluidStack getFluidInTank(int tank) {
-        if(tank == 0){
-            return fuelTank;
-        } else {
-            return null;
-        }
+        return fuelTank;
     }
 
     @Override
