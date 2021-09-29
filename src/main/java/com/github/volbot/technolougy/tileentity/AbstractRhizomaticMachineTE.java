@@ -16,6 +16,8 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.RecipeItemHelper;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.IIntArray;
@@ -40,8 +42,6 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
 
     protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
 
-    protected int cookingProgress;
-    protected int cookingTotalTime;
     protected int maxStackSize;
 
     protected IRecipeType<? extends AbstractCookingRecipe> recipeType = null;
@@ -51,34 +51,19 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
 
     private LazyOptional<IItemHandler> item_instance = LazyOptional.of(ITEM_CAP::getDefaultInstance);
 
-    protected IIntArray dataAccess;
-
     @Override
     protected void init() {
         super.init();
-        dataAccess=new RhizomaticMachineStateData(this);
-        this.cookingProgress = 0;
-        this.cookingTotalTime = 200;
-    }
-
-    public IIntArray getDataAccess() {
-        return dataAccess;
+        dataAccess = new RhizomaticMachineStateData();
+        dataAccess.cookingProgress = 0;
     }
 
     public int getCookingProgress() {
-        return cookingProgress;
+        return dataAccess.cookingProgress;
     }
 
     public int getCookingTotalTime() {
-        return cookingTotalTime;
-    }
-
-    public void setCookingProgress(int cookingProgress) {
-        this.cookingProgress = cookingProgress;
-    }
-
-    public void setCookingTotalTime(int cookingTotalTime) {
-        this.cookingTotalTime = cookingTotalTime;
+        return dataAccess.cookingTotalTime;
     }
 
     @Override
@@ -94,18 +79,19 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
             if (!input.isEmpty()) { //Machine can run
                 IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
                 if (canBurn(recipe) && drain(10, FluidAction.SIMULATE).getAmount() == 10) { //Recipe is valid
-                    cookingProgress++;
-                    System.out.println("INTERNAL PROG: " + cookingProgress + " | INTERNAL GOAL: " + cookingTotalTime);
-                    if (this.cookingProgress == this.cookingTotalTime) { //Done cooking
-                        this.cookingProgress = 0;
-                        drain(10, FluidAction.EXECUTE);
+                    dataAccess.cookingProgress++;
+                    if (dataAccess.cookingProgress == dataAccess.cookingTotalTime) { //Done cooking
+                        dataAccess.cookingProgress = 0;
+                        drain(50, FluidAction.EXECUTE);
                         extractItem(0, 1, false);
                         this.setRecipeUsed(recipe);
                         insertItem(1, new ItemStack(recipe.getResultItem().getItem(), 1), false);
                     }
+                } else {
+                    dataAccess.cookingProgress = 0;
                 }
             } else {
-                this.cookingProgress = 0;
+                dataAccess.cookingProgress = 0;
             }
         }
     }
@@ -248,7 +234,15 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
         super.save(nbt);
-        return serializeNBT();
+        nbt.putInt("CookTime", dataAccess.cookingProgress);
+        nbt.putInt("CookTimeTotal", dataAccess.cookingTotalTime);
+        ItemStackHelper.saveAllItems(nbt, this.items);
+        CompoundNBT compoundnbt = new CompoundNBT();
+        this.recipesUsed.forEach((p_235643_1_, p_235643_2_) -> {
+            compoundnbt.putInt(p_235643_1_.toString(), p_235643_2_);
+        });
+        nbt.put("RecipesUsed", compoundnbt);
+        return nbt;
     }
 
     @Override
@@ -262,8 +256,8 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
         super.deserializeNBT(nbt);
         this.items = NonNullList.withSize(3, ItemStack.EMPTY);
         ItemStackHelper.loadAllItems(nbt, this.items);
-        this.cookingProgress = nbt.getInt("CookTime");
-        this.cookingTotalTime = nbt.getInt("CookTimeTotal");
+        dataAccess.cookingProgress = nbt.getInt("CookTime");
+        dataAccess.cookingTotalTime = nbt.getInt("CookTimeTotal");
         CompoundNBT compoundnbt = nbt.getCompound("RecipesUsed");
         for (String s : compoundnbt.getAllKeys()) {
             this.recipesUsed.put(new ResourceLocation(s), compoundnbt.getInt(s));
@@ -273,13 +267,8 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        serializeNBT(nbt);
-        return nbt;
-    }
-
-    public CompoundNBT serializeNBT(CompoundNBT nbt) {
-        nbt.putInt("CookTime", this.cookingProgress);
-        nbt.putInt("CookTimeTotal", this.cookingTotalTime);
+        nbt.putInt("CookTime", dataAccess.cookingProgress);
+        nbt.putInt("CookTimeTotal", dataAccess.cookingTotalTime);
         ItemStackHelper.saveAllItems(nbt, this.items);
         CompoundNBT compoundnbt = new CompoundNBT();
         this.recipesUsed.forEach((p_235643_1_, p_235643_2_) -> {

@@ -127,7 +127,7 @@ public class RhizomeProxyTE extends TileEntity implements ITickableTileEntity {
     @Override
     public SUpdateTileEntityPacket getUpdatePacket(){
         CompoundNBT nbtTag = new CompoundNBT();
-        this.save(nbtTag);
+        nbtTag = this.save(nbtTag);
         return new SUpdateTileEntityPacket(getBlockPos(), -1, nbtTag);
     }
 

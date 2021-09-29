@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 
 public class SmelterTE extends AbstractRhizomaticMachineTE {
 
-    public SmelterTE(TileEntityType type){
+    public SmelterTE(TileEntityType type) {
         super(type);
         init();
     }
@@ -31,11 +31,11 @@ public class SmelterTE extends AbstractRhizomaticMachineTE {
     @Override
     protected void init() {
         super.init();
-        this.fuelTankLimit=5000;
+        dataAccess.fluidTankCapacity = 5000;
         this.recipeType = IRecipeType.SMELTING;
-        this.maxStackSize=64;
-        this.cookingTotalTime=200;
-        debugint=-1;
+        this.maxStackSize = 64;
+        dataAccess.cookingTotalTime = 170;
+        debugint = -1;
     }
 
     private int debugint;
@@ -43,9 +43,9 @@ public class SmelterTE extends AbstractRhizomaticMachineTE {
     @Override
     public void tick() {
         super.tick();
-        if(debugint==-1){
-            this.items.set(0,new ItemStack(Items.IRON_ORE,64));
-            debugint=0;
+        if (debugint == -1) {
+            this.items.set(0, new ItemStack(Items.IRON_ORE, 64));
+            debugint = 0;
         }
     }
 

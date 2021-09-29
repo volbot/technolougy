@@ -40,7 +40,6 @@ public class AbstractRhizomaticMachineBlock extends AbstractRhizomaticTankBlock 
     protected void openContainer(World world, BlockPos pos, PlayerEntity entity) {
         TileEntity te = world.getBlockEntity(pos);
         if (te instanceof AbstractRhizomaticMachineTE) {
-            System.out.println("MENU");
             entity.openMenu((INamedContainerProvider) te);
         }
     }
