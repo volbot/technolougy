@@ -3,21 +3,28 @@ package com.github.volbot.technolougy.tileentity;
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import com.github.volbot.technolougy.tileentity.container.RhizomaticMachineStateData;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.IIntArray;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHandler, ICapabilityProvider {
+public abstract class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHandler, ICapabilityProvider {
 
     protected FluidStack fuelTank;
 
@@ -26,12 +33,14 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
 
     private LazyOptional<IFluidHandler> instance = LazyOptional.of(FLUID_CAP::getDefaultInstance);
 
-    public AbstractRhizomaticTankTE(TileEntityType type){
+    public AbstractRhizomaticTankTE(TileEntityType type) {
         super(type);
     }
 
-    protected void init() {
-        fuelTank = new FluidStack(LouDeferredRegister.sugarWaterFluid.get(),0);
+    protected void init()
+    {
+        dataAccess = new RhizomaticMachineStateData();
+        fuelTank = new FluidStack(LouDeferredRegister.sugarWaterFluid.get(), 0);
     }
 
     @Override
@@ -69,28 +78,52 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
 
     @Override
     public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
-        if(tank == 0){
+        if (tank == 0) {
             return true;
         }
         return false;
     }
 
+    protected boolean requestFluid(int request) {
+        for (BlockPos pos : getRhizomeHolders()) {
+            System.out.println("POS: " + pos + " | REQUEST: " + request);
+            if (pos == null || pos == getBlockPos()) {
+                continue;
+            }
+            TileEntity te = level.getBlockEntity(pos);
+            if (te instanceof AbstractRhizomaticTankTE) {
+                AbstractRhizomaticTankTE tank = (AbstractRhizomaticTankTE) te;
+                FluidStack fillStack = new FluidStack(tank.getFluidInTank(0).getFluid(), request);
+                if(te instanceof AbstractRhizomaticMachineTE){
+                    fillStack.setAmount(100);
+                }
+                if (!tank.drain(fillStack, FluidAction.SIMULATE).isEmpty()) {
+                    this.fill(tank.drain(fillStack, FluidAction.EXECUTE), FluidAction.EXECUTE);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
     @Override
     public int fill(FluidStack resource, FluidAction action) {
         int quantity = resource.getAmount();
         int initialQuantity = fuelTank.getAmount();
-        if(initialQuantity!=dataAccess.fluidTankCapacity) {
+        if (initialQuantity != dataAccess.fluidTankCapacity) {
             if (initialQuantity + quantity > dataAccess.fluidTankCapacity) {
-                if(!action.simulate()) {
+                if (!action.simulate()) {
                     fuelTank.setAmount(dataAccess.fluidTankCapacity);
-                    dataAccess.fluidQuantity=dataAccess.fluidTankCapacity;
+                    dataAccess.fluidQuantity = dataAccess.fluidTankCapacity;
                     setChanged();
                 }
                 return dataAccess.fluidTankCapacity - initialQuantity;
             } else {
-                if(!action.simulate()) {
+                if (!action.simulate()) {
                     fuelTank.setAmount(initialQuantity + quantity);
-                    dataAccess.fluidQuantity=initialQuantity + quantity;
+                    dataAccess.fluidQuantity = initialQuantity + quantity;
                     setChanged();
                 }
                 return quantity;
@@ -106,17 +139,17 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
         int quantity = resource.getAmount();
         int initialQuantity = fuelTank.getAmount();
         FluidStack drained = new FluidStack(fuelTank.getFluid(), 0);
-        if(!(!fuelTank.getFluid().isSame(resource.getFluid())||fuelTank.isEmpty())) {
+        if (!(!fuelTank.getFluid().isSame(resource.getFluid()) || fuelTank.isEmpty())) {
             if (initialQuantity <= quantity) {
-                if(!action.simulate()) {
+                if (!action.simulate()) {
                     fuelTank.setAmount(0);
-                    dataAccess.fluidQuantity=0;
+                    dataAccess.fluidQuantity = 0;
                 }
                 drained.setAmount(initialQuantity);
             } else {
-                if(!action.simulate()) {
+                if (!action.simulate()) {
                     fuelTank.setAmount(initialQuantity - quantity);
-                    dataAccess.fluidQuantity=initialQuantity-quantity;
+                    dataAccess.fluidQuantity = initialQuantity - quantity;
                 }
                 drained.setAmount(quantity);
             }
@@ -130,17 +163,17 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
         int quantity = maxDrain;
         int initialQuantity = fuelTank.getAmount();
         FluidStack drained = new FluidStack(fuelTank.getFluid(), 0);
-        if(!fuelTank.isEmpty()) {
+        if (!fuelTank.isEmpty()) {
             if (initialQuantity <= quantity) {
-                if(!action.simulate()) {
+                if (!action.simulate()) {
                     fuelTank.setAmount(0);
-                    dataAccess.fluidQuantity=0;
+                    dataAccess.fluidQuantity = 0;
                 }
                 drained.setAmount(initialQuantity);
             } else {
-                if(!action.simulate()) {
+                if (!action.simulate()) {
                     fuelTank.setAmount(initialQuantity - quantity);
-                    dataAccess.fluidQuantity=initialQuantity-quantity;
+                    dataAccess.fluidQuantity = initialQuantity - quantity;
                 }
                 drained.setAmount(quantity);
             }
@@ -159,7 +192,7 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
         super.save(nbt);
         CompoundNBT nbt1 = new CompoundNBT();
         nbt1 = fuelTank.writeToNBT(nbt1);
-        nbt.put("Fluid",nbt1);
+        nbt.put("Fluid", nbt1);
         return nbt;
     }
 
@@ -173,7 +206,7 @@ public class AbstractRhizomaticTankTE extends RhizomeProxyTE implements IFluidHa
     public void deserializeNBT(CompoundNBT nbt) {
         CompoundNBT nbt1 = nbt.getCompound("Fluid");
         FluidStack loadStack = FluidStack.loadFluidStackFromNBT(nbt1);
-        this.fill(loadStack,FluidAction.EXECUTE);
+        this.fill(loadStack, FluidAction.EXECUTE);
     }
 
     @Override

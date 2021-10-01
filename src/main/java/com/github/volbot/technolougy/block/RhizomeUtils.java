@@ -23,7 +23,7 @@ public class RhizomeUtils {
         ArrayList<BlockPos> rhizomes = new ArrayList<>();
         for(BlockPos neighbor : neighbors){
             Block block = world.getBlockState(neighbor).getBlock();
-            if(block instanceof PointBlock && !rhizomes.contains(neighbor)) {
+            if(block instanceof AbstractRhizomaticTankBlock && !rhizomes.contains(neighbor)) {
                 System.out.println("RHIZOME FOUND");
                 rhizomes.add(neighbor);
             } else if(block instanceof ConnectionBlock) {
@@ -32,7 +32,7 @@ public class RhizomeUtils {
                 BlockPos[] connections = proxy.getRhizomeHolders();
                 for(BlockPos connection : connections) {
                     if(connection != null && world.getBlockEntity(connection) instanceof RhizomeTE) {
-                        if (!rhizomes.contains(connection)) {
+                        if (!rhizomes.contains(connection) && connection!=startPoint) {
                             rhizomes.add(connection);
                         }
                     }
@@ -60,7 +60,7 @@ public class RhizomeUtils {
         for(BlockPos neighbor : neighbors){
             if(!ignore.equals(neighbor)) {
                 Block block = world.getBlockState(neighbor).getBlock();
-                if (block instanceof PointBlock && !rhizomes.contains(neighbor)) {
+                if (block instanceof AbstractRhizomaticTankBlock && !rhizomes.contains(neighbor)) {
                     System.out.println("RHIZOME FOUND");
                     rhizomes.add(neighbor);
                 } else if (block instanceof ConnectionBlock) {

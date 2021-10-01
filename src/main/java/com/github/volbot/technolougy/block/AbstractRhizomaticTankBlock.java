@@ -1,12 +1,14 @@
 package com.github.volbot.technolougy.block;
 
 import com.github.volbot.technolougy.registry.LouDeferredRegister;
+import com.github.volbot.technolougy.tileentity.AbstractRhizomaticMachineTE;
 import com.github.volbot.technolougy.tileentity.AbstractRhizomaticTankTE;
 import com.github.volbot.technolougy.tileentity.RhizomeProxyTE;
 import com.github.volbot.technolougy.tileentity.RhizomeTE;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tileentity.TileEntity;
@@ -19,7 +21,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public class AbstractRhizomaticTankBlock extends ConnectionBlock {
+public abstract class AbstractRhizomaticTankBlock extends ConnectionBlock {
 
     private BlockPos neighborTemp = null;
 
@@ -53,7 +55,19 @@ public class AbstractRhizomaticTankBlock extends ConnectionBlock {
             }
             return ActionResultType.FAIL;
         } else {
-            return ActionResultType.PASS;
+            if (world.isClientSide) {
+                return ActionResultType.SUCCESS;
+            } else {
+                this.openContainer(world, pos, player);
+                return ActionResultType.CONSUME;
+            }
+        }
+    }
+
+    protected void openContainer(World world, BlockPos pos, PlayerEntity entity) {
+        TileEntity te = world.getBlockEntity(pos);
+        if (te instanceof AbstractRhizomaticTankTE) {
+            entity.openMenu((INamedContainerProvider) te);
         }
     }
 
@@ -75,7 +89,7 @@ public class AbstractRhizomaticTankBlock extends ConnectionBlock {
         };
         for(BlockPos neighbor : neighbors) {
             if(world.getBlockState(neighbor).getBlock() instanceof ConnectionBlock){
-                ((RhizomeProxyTE)world.getBlockEntity(neighbor)).searchConnections();
+                ((RhizomeProxyTE)world.getBlockEntity(neighbor)).searchConnections(null);
             }
         }
     }

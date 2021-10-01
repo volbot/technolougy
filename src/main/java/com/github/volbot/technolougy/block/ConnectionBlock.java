@@ -30,16 +30,17 @@ public class ConnectionBlock extends Block {
     @Override
     public void onPlace(BlockState state, World world, BlockPos pos, BlockState state1, boolean b) {
         super.onPlace(state, world, pos, state1, b);
-        ((RhizomeProxyTE)world.getBlockEntity(pos)).searchConnections();
+        ((RhizomeProxyTE)world.getBlockEntity(pos)).searchConnections(null);
     }
 
 
     @Override
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos pos2, boolean b) {
         super.neighborChanged(state, world, pos, block, pos2, b);
-        if(world.getBlockState(pos2).getBlock()==Blocks.AIR) {
-            System.out.println("AIR DETECTED SEARCHING CONNECTIONS");
-            ((RhizomeProxyTE) world.getBlockEntity(pos)).searchConnections();
+        Block block1 = world.getBlockState(pos2).getBlock();
+        if(block1==Blocks.AIR) {
+            System.out.println("SEARCHING CONNECTIONS");
+            ((RhizomeProxyTE) world.getBlockEntity(pos)).searchConnections(null);
         }
     }
 

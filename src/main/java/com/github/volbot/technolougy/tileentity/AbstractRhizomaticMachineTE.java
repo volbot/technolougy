@@ -1,5 +1,6 @@
 package com.github.volbot.technolougy.tileentity;
 
+import com.github.volbot.technolougy.registry.LouDeferredRegister;
 import com.github.volbot.technolougy.tileentity.container.RhizomaticMachineStateData;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -9,6 +10,7 @@ import net.minecraft.inventory.*;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BucketItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
@@ -16,11 +18,8 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.RecipeItemHelper;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.IIntArray;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -43,6 +42,7 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
 
     protected int maxStackSize;
+    protected int tickCost;
 
     protected IRecipeType<? extends AbstractCookingRecipe> recipeType = null;
 
@@ -54,46 +54,43 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     @Override
     protected void init() {
         super.init();
-        dataAccess = new RhizomaticMachineStateData();
         dataAccess.cookingProgress = 0;
-    }
-
-    public int getCookingProgress() {
-        return dataAccess.cookingProgress;
-    }
-
-    public int getCookingTotalTime() {
-        return dataAccess.cookingTotalTime;
+        tickCost=1;
     }
 
     @Override
     public void tick() {
         super.tick();
-        if (!getLevel().isClientSide()) { //Running on server
-            ItemStack fluidBucket = getStackInSlot(2);
-            if (!fluidBucket.isEmpty()) {
+        if (!getLevel().isClientSide()) {
+            if (isFuel(getStackInSlot(2))) {
                 setStackInSlot(2, Items.BUCKET.getDefaultInstance());
-                this.fill(new FluidStack(((BucketItem) fluidBucket.getItem()).getFluid(), 1000), FluidAction.EXECUTE);
+                this.fill(new FluidStack(((BucketItem) getStackInSlot(2).getItem()).getFluid(), 1000), FluidAction.EXECUTE);
             }
             ItemStack input = getStackInSlot(0);
-            if (!input.isEmpty()) { //Machine can run
-                IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
-                if (canBurn(recipe) && drain(10, FluidAction.SIMULATE).getAmount() == 10) { //Recipe is valid
-                    dataAccess.cookingProgress++;
-                    if (dataAccess.cookingProgress == dataAccess.cookingTotalTime) { //Done cooking
-                        dataAccess.cookingProgress = 0;
-                        drain(50, FluidAction.EXECUTE);
-                        extractItem(0, 1, false);
-                        this.setRecipeUsed(recipe);
-                        insertItem(1, new ItemStack(recipe.getResultItem().getItem(), 1), false);
-                    }
-                } else {
-                    dataAccess.cookingProgress = 0;
-                }
+            if(getFluidInTank(0).getAmount()<dataAccess.fluidTankCapacity){
+                requestFluid(100);
+            }
+            if(getFluidInTank(0).isEmpty()||input.isEmpty()){
+                dataAccess.cookingProgress=0;
             } else {
-                dataAccess.cookingProgress = 0;
+                IRecipe<?> recipe = getLevel().getRecipeManager().getRecipeFor(this.recipeType, new Inventory(input), this.level).orElse(null);
+                if (canBurn(recipe) && //Recipe is valid
+                        (drain(tickCost, FluidAction.SIMULATE).getAmount() == tickCost)) { //Tank or adjacent has fluid
+                    dataAccess.cookingProgress++;
+                    drain(tickCost, FluidAction.EXECUTE);
+                    if (dataAccess.cookingProgress == dataAccess.cookingTotalTime) { //Done cooking
+                        burn(recipe);
+                    }
+                }
             }
         }
+    }
+
+    protected void burn(IRecipe recipe) {
+        dataAccess.cookingProgress = 0;
+        extractItem(0, 1, false);
+        this.setRecipeUsed(recipe);
+        insertItem(1, new ItemStack(recipe.getResultItem().getItem(), 1), false);
     }
 
     protected boolean canBurn(@Nullable IRecipe<?> irecipe) {
@@ -115,6 +112,17 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
         } else {
             return false;
         }
+    }
+
+    protected boolean isFuel(ItemStack stack) {
+        Item item = stack.getItem();
+        if (item instanceof BucketItem) {
+            BucketItem bucket = (BucketItem) item;
+            if (bucket.getFluid().isSame(LouDeferredRegister.sugarWaterFluid.get())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Nonnull
@@ -278,10 +286,6 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
         return nbt;
     }
 
-    @Nullable
-    @Override
-    public abstract Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player);
-
     @Override
     public abstract ITextComponent getDisplayName();
 
@@ -289,4 +293,9 @@ public abstract class AbstractRhizomaticMachineTE extends AbstractRhizomaticTank
     public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
         this.items.set(slot, stack);
     }
+
+    @Nullable
+    @Override
+    public abstract Container createMenu(int containerID, PlayerInventory inventory, PlayerEntity player);
+
 }

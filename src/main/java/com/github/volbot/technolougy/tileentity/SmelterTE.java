@@ -31,22 +31,15 @@ public class SmelterTE extends AbstractRhizomaticMachineTE {
     @Override
     protected void init() {
         super.init();
-        dataAccess.fluidTankCapacity = 5000;
         this.recipeType = IRecipeType.SMELTING;
+        dataAccess.fluidTankCapacity=5000;
         this.maxStackSize = 64;
         dataAccess.cookingTotalTime = 170;
-        debugint = -1;
     }
-
-    private int debugint;
 
     @Override
     public void tick() {
         super.tick();
-        if (debugint == -1) {
-            this.items.set(0, new ItemStack(Items.IRON_ORE, 64));
-            debugint = 0;
-        }
     }
 
     @Nullable
